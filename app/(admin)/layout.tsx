@@ -1,13 +1,13 @@
 import { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import { useAuth } from "../context/AuthContext";
 import Loader from "../components/Loader";
+import { useAuth } from "../context/AuthContext";
 
 interface AdminLayoutProps {
   children: ReactNode;
 }
 
-const AdminLayout = ({ children }: AdminLayoutProps) => {
+const AdminMainLayout = ({ children }: AdminLayoutProps) => {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -15,7 +15,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   }
 
   if (!user) {
-    redirect("/login/admin");
+    redirect("/login/student");
   }
 
   if (user.role !== "admin") {
@@ -25,4 +25,4 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   return <>{children}</>;
 };
 
-export default AdminLayout;
+export default AdminMainLayout;

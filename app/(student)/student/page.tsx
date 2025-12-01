@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 
-export default function StudentRootPage() {
+const StudentIndexPage = () => {
   redirect("/student/dashboard");
-}
+};
+
+export default StudentIndexPage;
