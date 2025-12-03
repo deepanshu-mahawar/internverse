@@ -22,11 +22,12 @@ interface StudentLayoutProps {
 
 const StudentLayout = ({ children }: StudentLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  // const { user, loading } = useAuth();
+  const { user, loading } = useAuth();
+  console.log("student", user);
 
-  // if (loading) return <Loader fullScreen />;
-  // if (!user) redirect("/login/student");
-  // if (user.role !== "student") redirect(`/${user.role}/dashboard`);
+  if (loading) return <Loader fullScreen />;
+  if (!user) redirect("/login/student");
+  if (user.role !== "student") redirect(`/${user.role}/dashboard`);
 
   const menuItems = [
     { path: "/student/dashboard", label: "Dashboard", icon: LayoutDashboard },
