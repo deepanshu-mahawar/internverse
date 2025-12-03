@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
 
@@ -25,10 +25,11 @@ const StudentDashboard: React.FC = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await axios.get<Project[]>(
-          `http://127.0.0.1:5000/api/students/${user.id}/projects`
+        const response = await axios.get(
+          `http://127.0.0.1:5000/api/projects/student/${user?.id}`
         );
-        setProjects(response.data);
+
+        setProjects(response.data.projects);
       } catch (error) {
         console.error("Error fetching projects:", error);
       } finally {
@@ -41,9 +42,30 @@ const StudentDashboard: React.FC = () => {
     }
   }, [user?.id]);
 
+  // useEffect(() => {
+  //   const fetchProjects = async () => {
+  //     try {
+  //       const response = await axios.get<Project[]>(
+  //         `http://127.0.0.1:5000/api/students/${user?.id}/projects`
+  //       );
+  //       setProjects(response.data);
+  //     } catch (error) {
+  //       console.error("Error fetching projects:", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   if (user?.id) {
+  //     fetchProjects();
+  //   }
+  // }, [user?.id]);
+
   const activeInternships = projects.filter(
-    (p) => p.type === "internship" && p.status !== "completed"
+    (p) => p.type === "internship"
+    // && p.status !== "completed"
   );
+
   const underReview = projects.filter((p) => p.status === "under_review");
   const needsImprovement = projects.filter(
     (p) => p.status === "needs_improvement"
@@ -60,12 +82,12 @@ const StudentDashboard: React.FC = () => {
     return badges[status] || badges.pending;
   };
 
-  const getStatusText = (status: string) => {
-    return status
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  };
+  // const getStatusText = (status: string) => {
+  //   return status
+  //     .split("_")
+  //     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+  //     .join(" ");
+  // };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -75,10 +97,10 @@ const StudentDashboard: React.FC = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-800">
-          Welcome back, {user.name}!
+          Welcome back, {user?.name}!
         </h1>
         <p className="text-gray-600 mt-1">
-          Here's an overview of your internships and projects
+          Heres an overview of your internships and projects
         </p>
       </div>
 
@@ -154,7 +176,7 @@ const StudentDashboard: React.FC = () => {
                           project.status
                         )}`}
                       >
-                        {getStatusText(project.status)}
+                        {/* {getStatusText(project.status)} */}
                       </span>
                     </td>
                   </tr>

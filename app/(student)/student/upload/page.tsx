@@ -109,6 +109,11 @@ const Upload: React.FC = () => {
       return;
     }
 
+    if (!user || !user.id) {
+      console.error("User not authenticated");
+      return;
+    }
+
     try {
       const formDataToSend = new FormData();
 
