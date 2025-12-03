@@ -99,9 +99,11 @@ const RegisterStudent = () => {
 
     if (result.success) {
       setShowSuccess(true);
+      alert("success");
       setTimeout(() => navigate.push("/login/student"), 2000);
     } else {
       setErrors({ general: result.message });
+      alert("error");
       setIsSubmitting(false);
     }
   };

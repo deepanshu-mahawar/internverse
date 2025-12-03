@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect } from "react";
 
 import { FolderOpen, Users, Clock, CheckCircle } from "lucide-react";

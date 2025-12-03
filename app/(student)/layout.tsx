@@ -8,19 +8,19 @@ interface StudentLayoutProps {
 }
 
 const StudentMainLayout = ({ children }: StudentLayoutProps) => {
-  const { user, loading } = useAuth();
+  // const { user, loading } = useAuth();
 
-  if (loading) {
-    return <Loader fullScreen />;
-  }
+  // if (loading) {
+  //   return <Loader fullScreen />;
+  // }
 
-  if (!user) {
-    redirect("/login/student");
-  }
+  // if (!user) {
+  //   redirect("/login/student");
+  // }
 
-  if (user.role !== "student") {
-    redirect(`/${user.role}/dashboard`);
-  }
+  // if (user.role !== "student") {
+  //   redirect(`/${user.role}/dashboard`);
+  // }
 
   return <>{children}</>;
 };

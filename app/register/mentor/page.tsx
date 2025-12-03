@@ -25,7 +25,6 @@ interface ErrorState {
 }
 
 const RegisterMentor = () => {
-  // const navigate = useNavigate();
   const navigate = useRouter();
   const { registerMentor } = useAuth();
 
@@ -108,9 +107,11 @@ const RegisterMentor = () => {
 
     if (result.success) {
       setShowSuccess(true);
+      alert("success");
       setTimeout(() => navigate.push("/login/mentor"), 2000);
     } else {
       setErrors({ general: result.message || "Registration failed" });
+      alert("error");
       setIsSubmitting(false);
     }
   };

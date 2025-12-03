@@ -8,19 +8,19 @@ interface MentorLayoutProps {
 }
 
 const MentorMainLayout = ({ children }: MentorLayoutProps) => {
-  const { user, loading } = useAuth();
+  // const { user, loading } = useAuth();
 
-  if (loading) {
-    return <Loader fullScreen />;
-  }
+  // if (loading) {
+  //   return <Loader fullScreen />;
+  // }
 
-  if (!user) {
-    redirect("/login/student");
-  }
+  // if (!user) {
+  //   redirect("/login/student");
+  // }
 
-  if (user.role !== "mentor") {
-    redirect(`/${user.role}/dashboard`);
-  }
+  // if (user.role !== "mentor") {
+  //   redirect(`/${user.role}/dashboard`);
+  // }
 
   return <>{children}</>;
 };

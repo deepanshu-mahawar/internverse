@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 
 import { User, Mail, GraduationCap, Hash, Save } from "lucide-react";

@@ -1,3 +1,6 @@
+"use client"
+
+
 import { useState, useEffect } from "react";
 
 import { Eye, GraduationCap, Mail, Hash } from "lucide-react";

@@ -1,3 +1,6 @@
+"use client"
+
+
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 
 import { Eye, Calendar, User, CheckCircle, XCircle, Edit } from "lucide-react";
