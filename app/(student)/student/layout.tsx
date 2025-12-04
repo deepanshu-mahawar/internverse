@@ -23,7 +23,6 @@ interface StudentLayoutProps {
 const StudentLayout = ({ children }: StudentLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, loading } = useAuth();
-  console.log("student", user);
 
   if (loading) return <Loader fullScreen />;
   if (!user) redirect("/login/student");

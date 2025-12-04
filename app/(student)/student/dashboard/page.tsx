@@ -20,35 +20,17 @@ interface Project {
 const StudentDashboard: React.FC = () => {
   const { user } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
+  console.log("Projects:", projects);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await axios.get(
-          `http://127.0.0.1:5000/api/projects/student/${user?.id}`
-        );
-
-        setProjects(response.data.projects);
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (user?.id) {
-      fetchProjects();
-    }
-  }, [user?.id]);
 
   // useEffect(() => {
   //   const fetchProjects = async () => {
   //     try {
-  //       const response = await axios.get<Project[]>(
-  //         `http://127.0.0.1:5000/api/students/${user?.id}/projects`
+  //       const response = await axios.get(
+  //         `http://127.0.0.1:5000/api/projects/student/${user?.id}`
   //       );
-  //       setProjects(response.data);
+
+  //       setProjects(response.data.projects);
   //     } catch (error) {
   //       console.error("Error fetching projects:", error);
   //     } finally {
@@ -60,6 +42,26 @@ const StudentDashboard: React.FC = () => {
   //     fetchProjects();
   //   }
   // }, [user?.id]);
+
+  useEffect(() => {
+  const fetchProjects = async () => {
+    try {
+      const response = await axios.get(
+        `http://127.0.0.1:5000/api/projects/student/${user?.id}`
+      );
+
+      setProjects(response.data.projects); // <-- correct
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (user?.id) {
+    fetchProjects();
+  }
+}, [user?.id]);
 
   const activeInternships = projects.filter(
     (p) => p.type === "internship"
