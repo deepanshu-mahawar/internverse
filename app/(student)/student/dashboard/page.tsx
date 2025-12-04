@@ -8,19 +8,12 @@ import { useAuth } from "@/app/context/AuthContext";
 import StatCard from "@/app/components/StatCard";
 import Card from "@/app/components/Card";
 
-interface Project {
-  id: string;
-  title: string;
-  type: "internship" | "project";
-  status: "approved" | "under_review" | "needs_improvement" | "pending";
-  mentorName: string;
-  feedback?: string;
-}
-
 const StudentDashboard: React.FC = () => {
   const { user } = useAuth();
-  const [projects, setProjects] = useState<Project[]>([]);
-  console.log("Projects:", projects);
+  const [projects, setProjects] = useState<any[]>([]);
+
+  console.log(user);
+
   const [loading, setLoading] = useState(true);
 
   // useEffect(() => {
@@ -30,7 +23,9 @@ const StudentDashboard: React.FC = () => {
   //         `http://127.0.0.1:5000/api/projects/student/${user?.id}`
   //       );
 
-  //       setProjects(response.data.projects);
+  //       console.log("API response:", response.data);
+
+  //       setProjects(response.data.data);
   //     } catch (error) {
   //       console.error("Error fetching projects:", error);
   //     } finally {
@@ -44,28 +39,52 @@ const StudentDashboard: React.FC = () => {
   // }, [user?.id]);
 
   useEffect(() => {
-  const fetchProjects = async () => {
-    try {
-      const response = await axios.get(
-        `http://127.0.0.1:5000/api/projects/student/${user?.id}`
-      );
+    const fetchProjects = async () => {
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:5000/api/projects/student/${user?.id}`
+        );
 
-      setProjects(response.data.projects); // <-- correct
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-    } finally {
-      setLoading(false);
+        const projects = response.data.data;
+
+        // Fetch mentors for each project
+        const projectsWithMentors = await Promise.all(
+          projects.map(async (project: any) => {
+            try {
+              const mentorRes = await axios.get(
+                `http://127.0.0.1:5000/api/mentors/${project.mentor_id}`
+              );
+
+              return {
+                ...project,
+                mentorName: mentorRes.data.mentor.name,
+              };
+            } catch {
+              return {
+                ...project,
+                mentorName: "Unknown",
+              };
+            }
+          })
+        );
+
+        setProjects(projectsWithMentors);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user?.id) {
+      fetchProjects();
     }
-  };
+  }, [user?.id]);
 
-  if (user?.id) {
-    fetchProjects();
-  }
-}, [user?.id]);
+  console.log("projects", projects);
 
   const activeInternships = projects.filter(
-    (p) => p.type === "internship"
-    // && p.status !== "completed"
+    (p) => p.type === "internship" && p.status !== "completed"
   );
 
   const underReview = projects.filter((p) => p.status === "under_review");
@@ -74,8 +93,8 @@ const StudentDashboard: React.FC = () => {
   );
   const recentProjects = projects.slice(0, 5);
 
-  const getStatusBadge = (status: Project["status"]) => {
-    const badges: Record<Project["status"], string> = {
+  const getStatusBadge = (status: any["status"]) => {
+    const badges: Record<any["status"], string> = {
       approved: "bg-green-100 text-green-700",
       under_review: "bg-yellow-100 text-yellow-700",
       needs_improvement: "bg-red-100 text-red-700",
@@ -84,12 +103,12 @@ const StudentDashboard: React.FC = () => {
     return badges[status] || badges.pending;
   };
 
-  // const getStatusText = (status: string) => {
-  //   return status
-  //     .split("_")
-  //     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-  //     .join(" ");
-  // };
+  const getStatusText = (status: string) => {
+    return status
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -160,14 +179,14 @@ const StudentDashboard: React.FC = () => {
               <tbody>
                 {recentProjects.map((project) => (
                   <tr
-                    key={project.id}
+                    key={project?._id}
                     className="border-b border-gray-100 hover:bg-gray-50"
                   >
                     <td className="py-3 px-4 text-sm text-gray-800">
-                      {project.title}
+                      {project?.title}
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-600 capitalize">
-                      {project.type}
+                      {project?.project_type}
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-600">
                       {project.mentorName}
@@ -178,7 +197,7 @@ const StudentDashboard: React.FC = () => {
                           project.status
                         )}`}
                       >
-                        {/* {getStatusText(project.status)} */}
+                        {getStatusText(project.status)}
                       </span>
                     </td>
                   </tr>
