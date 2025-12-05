@@ -1,5 +1,4 @@
-"use client"
-
+"use client";
 
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 
@@ -10,58 +9,82 @@ import Button from "@/app/components/Button";
 import Card from "@/app/components/Card";
 import Modal from "@/app/components/Modal";
 
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  status: "approved" | "needs_improvement" | "Submitted" | string;
-  grade?: string;
-  feedback?: string;
-  project_type: string;
-  student_name: string;
-  upload_date?: string;
-  start_date?: string;
-  end_date?: string;
-  company_name?: string;
-  github_link?: string;
-  certificate_path?: string;
-  technologies?: string[];
-}
+// interface Project {
+//   id: string;
+//   title: string;
+//   description: string;
+//   status: "approved" | "needs_improvement" | "Submitted" | string;
+//   grade?: string;
+//   feedback?: string;
+//   project_type: string;
+//   student_name: string;
+//   upload_date?: string;
+//   start_date?: string;
+//   end_date?: string;
+//   company_name?: string;
+//   github_link?: string;
+//   certificate_path?: string;
+//   technologies?: string[];
+// }
 
-interface Mentor {
-  id: string;
-}
+// interface Mentor {
+//   id: string;
+// }
 
-interface ReviewForm {
-  feedback: string;
-  status: string;
-  grade: string;
-}
+// interface ReviewForm {
+//   feedback: string;
+//   status: string;
+//   grade: string;
+// }
 
 const MentorProjects: React.FC = () => {
-  const { user } = useAuth() as { user: Mentor | null };
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const { user } = useAuth();
+  // as { user: Mentor | null };
+  const [projects, setProjects] = useState<any[]>([]);
+  const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<
     "all" | "approved" | "needs_improvement" | "Submitted"
   >("all");
-  const [reviewForm, setReviewForm] = useState<ReviewForm>({
-    feedback: "",
-    status: "approved",
-    grade: "A",
-  });
+  // const [reviewForm, setReviewForm] = useState<ReviewForm>({
+  //   feedback: "",
+  //   status: "approved",
+  //   grade: "A",
+  // });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
-      if (!user?.id) return;
+      if (!user?._id) return;
       try {
-        const res = await axios.get<Project[]>(
-          `http://127.0.0.1:5000/api/mentors/${user.id}/projects`
+        const res = await axios.get<any[]>(
+          `http://127.0.0.1:5000/api/projects/mentor/${user?._id}`
         );
-        setProjects(res.data || []);
+
+        const projectsData = res.data.data || [];
+
+        const projectsWithMentors = await Promise.all(
+          projectsData.map(async (project: any) => {
+            try {
+              const mentorRes = await axios.get(
+                `http://127.0.0.1:5000/api/students/${project.student_id}`
+              );
+
+              return {
+                ...project,
+                studentName: mentorRes.data?.student?.name || "Unknown",
+              };
+            } catch {
+              return {
+                ...project,
+                studentName: "Unknown",
+              };
+            }
+          })
+        );
+
+        setProjects(projectsWithMentors);
       } catch (err) {
         console.error("Error fetching projects:", err);
         setError("Failed to load projects. Please try again later.");
@@ -72,7 +95,10 @@ const MentorProjects: React.FC = () => {
     fetchProjects();
   }, [user?.id]);
 
+  console.log("projects", projects);
+
   const myProjects = projects;
+
   const filteredProjects =
     filterStatus === "all"
       ? myProjects
@@ -94,41 +120,41 @@ const MentorProjects: React.FC = () => {
       .join(" ");
   };
 
-  const handleReview = (project: Project) => {
-    setSelectedProject(project);
-    setReviewForm({
-      feedback: project.feedback || "",
-      status: project.status,
-      grade: project.grade || "A",
-    });
-    setIsReviewModalOpen(true);
-  };
+  // const handleReview = (project: Project) => {
+  //   setSelectedProject(project);
+  //   setReviewForm({
+  //     feedback: project.feedback || "",
+  //     status: project.status,
+  //     grade: project.grade || "A",
+  //   });
+  //   setIsReviewModalOpen(true);
+  // };
 
-  const handleSubmitReview = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!selectedProject || !user?.id) return;
-    try {
-      await axios.post(
-        `http://127.0.0.1:5000/api/projects/${selectedProject.id}/feedbacks`,
-        {
-          mentor_id: user.id,
-          grade: reviewForm.grade,
-          remarks: reviewForm.feedback,
-        }
-      );
-      setIsReviewModalOpen(false);
-      setSelectedProject(null);
-      setReviewForm({ feedback: "", status: "approved", grade: "A" });
-      // Refresh projects
-      const res = await axios.get<Project[]>(
-        `http://127.0.0.1:5000/api/mentors/${user.id}/projects`
-      );
-      setProjects(res.data || []);
-    } catch (err) {
-      console.error("Error submitting feedback:", err);
-      setError("Failed to submit feedback. Please try again later.");
-    }
-  };
+  // const handleSubmitReview = async (e: FormEvent) => {
+  //   e.preventDefault();
+  //   if (!selectedProject || !user?.id) return;
+  //   try {
+  //     await axios.post(
+  //       `http://127.0.0.1:5000/api/projects/${selectedProject.id}/feedbacks`,
+  //       {
+  //         mentor_id: user.id,
+  //         grade: reviewForm.grade,
+  //         remarks: reviewForm.feedback,
+  //       }
+  //     );
+  //     setIsReviewModalOpen(false);
+  //     setSelectedProject(null);
+  //     setReviewForm({ feedback: "", status: "approved", grade: "A" });
+  //     // Refresh projects
+  //     const res = await axios.get<Project[]>(
+  //       `http://127.0.0.1:5000/api/mentors/${user.id}/projects`
+  //     );
+  //     setProjects(res.data || []);
+  //   } catch (err) {
+  //     console.error("Error submitting feedback:", err);
+  //     setError("Failed to submit feedback. Please try again later.");
+  //   }
+  // };
 
   if (loading) return <div className="text-center py-8">Loading...</div>;
   if (error)
@@ -212,7 +238,7 @@ const MentorProjects: React.FC = () => {
                 <div className="space-y-2">
                   <div className="flex items-center text-sm text-gray-600">
                     <User size={16} className="mr-2" />
-                    {project.student_name}
+                    {project.studentName}
                   </div>
                   {project.upload_date && (
                     <div className="flex items-center text-sm text-gray-600">
@@ -373,7 +399,7 @@ const MentorProjects: React.FC = () => {
         )}
       </Modal>
 
-      <Modal
+      {/* <Modal
         isOpen={isReviewModalOpen}
         onClose={() => {
           setIsReviewModalOpen(false);
@@ -457,7 +483,7 @@ const MentorProjects: React.FC = () => {
             </Button>
           </div>
         </form>
-      </Modal>
+      </Modal> */}
     </div>
   );
 };
