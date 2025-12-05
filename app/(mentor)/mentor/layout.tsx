@@ -11,21 +11,23 @@ import {
 } from "lucide-react";
 import Navbar from "@/app/components/Navbar";
 import Sidebar from "@/app/components/Sidebar";
-
-interface MenuItem {
-  path: string;
-  label: string;
-  icon: React.ComponentType<{ size?: number }>;
-}
+import { useAuth } from "@/app/context/AuthContext";
+import Loader from "@/app/components/Loader";
+import { redirect } from "next/navigation";
 
 interface MentorLayoutProps {
   children: ReactNode;
 }
 
-const MentorLayout: React.FC<MentorLayoutProps> = ({ children }) => {
+const MentorLayout = ({ children }: MentorLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user, loading } = useAuth();
 
-  const menuItems: MenuItem[] = [
+  if (loading) return <Loader fullScreen />;
+  if (!user) redirect("/login/mentor");
+  if (user.role !== "mentor") redirect(`/${user.role}/dashboard`);
+
+  const menuItems = [
     { path: "/mentor/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { path: "/mentor/projects", label: "Review Projects", icon: FolderOpen },
     { path: "/mentor/students", label: "My Students", icon: Users },

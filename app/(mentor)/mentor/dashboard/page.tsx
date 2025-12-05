@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
 
@@ -8,43 +8,63 @@ import { useAuth } from "@/app/context/AuthContext";
 import StatCard from "@/app/components/StatCard";
 import Card from "@/app/components/Card";
 
-interface Project {
-  id: string;
-  title: string;
-  student_id: string;
-  student_name: string;
-  project_type: string;
-  status: "Submitted" | "approved" | "needs_improvement" | string;
-  upload_date?: string;
-}
-
-interface Student {
-  id: string;
-  name: string;
-  department: string;
-}
-
 const MentorDashboard: React.FC = () => {
   const { user } = useAuth();
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [students, setStudents] = useState<Student[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!user?.id) return;
+      if (!user?._id) return;
+
+      setLoading(true);
+      setError(null);
+
       try {
-        const [projectsRes, studentsRes] = await Promise.all([
-          axios.get<Project[]>(
-            `http://127.0.0.1:5000/api/mentors/${user.id}/projects`
-          ),
-          axios.get<Student[]>(
-            `http://127.0.0.1:5000/api/mentors/${user.id}/students`
-          ),
-        ]);
-        setProjects(projectsRes.data || []);
-        setStudents(studentsRes.data || []);
+        const projectsRes = await axios.get<any[]>(
+          `http://127.0.0.1:5000/api/projects/mentor/${user?._id}`
+        );
+
+        const projectsData = projectsRes.data.data || [];
+
+        const projectsWithMentors = await Promise.all(
+          projectsData.map(async (project: any) => {
+            try {
+              const mentorRes = await axios.get(
+                `http://127.0.0.1:5000/api/students/${project.student_id}`
+              );
+
+              return {
+                ...project,
+                studentName: mentorRes.data?.student?.name || "Unknown",
+              };
+            } catch {
+              return {
+                ...project,
+                studentName: "Unknown",
+              };
+            }
+          })
+        );
+
+        setProjects(projectsWithMentors);
+
+        const studentIds = Array.from(
+          new Set(projectsData.map((p) => p.student_id).filter(Boolean))
+        );
+
+        if (studentIds.length === 0) {
+          setStudents([]);
+          return;
+        }
+
+        const studentsRes = await axios.get<any[]>(
+          `http://127.0.0.1:5000/api/students/${studentIds}`
+        );
+
+        setStudents(studentsRes.data.data || []);
       } catch (err) {
         console.error("Error fetching data:", err);
         setError("Failed to load data. Please try again later.");
@@ -52,8 +72,9 @@ const MentorDashboard: React.FC = () => {
         setLoading(false);
       }
     };
+
     fetchData();
-  }, [user?.id]);
+  }, [user?._id]);
 
   if (loading) return <div className="text-center py-8">Loading...</div>;
   if (error)
@@ -68,6 +89,7 @@ const MentorDashboard: React.FC = () => {
     (p) => p.status === "needs_improvement"
   );
   const myStudents = students;
+
   const recentSubmissions = myProjects
     .filter((p) => p.upload_date)
     .sort(
@@ -158,14 +180,14 @@ const MentorDashboard: React.FC = () => {
               <tbody>
                 {recentSubmissions.map((project) => (
                   <tr
-                    key={project.id}
+                    key={project._id}
                     className="border-b border-gray-100 hover:bg-gray-50"
                   >
                     <td className="py-3 px-4 text-sm text-gray-800">
                       {project.title}
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-600">
-                      {project.student_name}
+                      {project.studentName}
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-600 capitalize">
                       {project.project_type}
@@ -229,9 +251,9 @@ const MentorDashboard: React.FC = () => {
             </p>
           ) : (
             <div className="space-y-3">
-              {myStudents.slice(0, 5).map((student) => {
+              {myStudents.slice(0, 5).map((student: any) => {
                 const studentProjects = myProjects.filter(
-                  (p) => p.student_id === student.id
+                  (p) => p.student_id === student._id
                 );
                 return (
                   <div
