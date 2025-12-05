@@ -1,3 +1,303 @@
+// "use client";
+
+// import { useState, useEffect } from "react";
+
+// import { Eye, Calendar, User } from "lucide-react";
+// import axios from "axios";
+// import { useAuth } from "@/app/context/AuthContext";
+// import Button from "@/app/components/Button";
+// import Card from "@/app/components/Card";
+// import Modal from "@/app/components/Modal";
+
+// const StudentProjects: React.FC = () => {
+//   const { user } = useAuth();
+//   const [selectedProject, setSelectedProject] = useState<any | null>(null);
+//   const [filterType, setFilterType] = useState<
+//     "all" | "project" | "internship"
+//   >("all");
+//   const [projects, setProjects] = useState<any[]>([]);
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     const fetchProjects = async () => {
+//       if (!user?.id) return;
+//       try {
+//         const response = await axios.get(
+//           `http://127.0.0.1:5000/api/projects/student/${user?.id}`
+//         );
+
+//         const projects = response.data.data;
+
+//         const projectsWithMentors = await Promise.all(
+//           projects.map(async (project: any) => {
+//             try {
+//               const mentorRes = await axios.get(
+//                 `http://127.0.0.1:5000/api/mentors/${project.mentor_id}`
+//               );
+
+//               return {
+//                 ...project,
+//                 mentorName: mentorRes.data.mentor.name,
+//               };
+//             } catch {
+//               return {
+//                 ...project,
+//                 mentorName: "Unknown",
+//               };
+//             }
+//           })
+//         );
+
+//         setProjects(projectsWithMentors);
+//       } catch (error) {
+//         console.error("Error fetching projects:", error);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     if (user?.id) {
+//       fetchProjects();
+//     }
+//   }, [user?.id]);
+
+//   console.log("projects", projects);
+
+//   const filteredProjects =
+//     filterType === "all"
+//       ? projects
+//       : projects.filter((p) => p.type === filterType);
+
+//   const getStatusBadge = (status: any["status"]) => {
+//     const badges: Record<any["status"] | "pending", string> = {
+//       approved: "bg-green-100 text-green-700",
+//       under_review: "bg-yellow-100 text-yellow-700",
+//       needs_improvement: "bg-red-100 text-red-700",
+//       pending: "bg-gray-100 text-gray-700",
+//     };
+//     return badges[status] || badges.pending;
+//   };
+
+//   const getStatusText = (status: any["status"]) => {
+//     return status
+//       .split("_")
+//       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+//       .join(" ");
+//   };
+
+//   if (loading) return <div>Loading...</div>;
+
+//   return (
+//     <div className="space-y-6">
+//       <div>
+//         <h1 className="text-3xl font-bold text-gray-800">
+//           My Projects & Internships
+//         </h1>
+//         <p className="text-gray-600 mt-1">
+//           View and manage all your submitted work
+//         </p>
+//       </div>
+
+//       <div className="flex flex-wrap gap-3">
+//         <Button
+//           variant={filterType === "all" ? "primary" : "secondary"}
+//           onClick={() => setFilterType("all")}
+//         >
+//           All ({projects.length})
+//         </Button>
+//         <Button
+//           variant={filterType === "project" ? "primary" : "secondary"}
+//           onClick={() => setFilterType("project")}
+//         >
+//           Projects (
+//           {projects.filter((p) => p.project_type === "project").length})
+//         </Button>
+//         <Button
+//           variant={filterType === "internship" ? "primary" : "secondary"}
+//           onClick={() => setFilterType("internship")}
+//         >
+//           Internships (
+//           {projects.filter((p) => p.project_type === "internship").length})
+//         </Button>
+//       </div>
+
+//       {filteredProjects.length === 0 ? (
+//         <Card>
+//           <p className="text-gray-500 text-center py-12">
+//             No projects or internships found
+//           </p>
+//         </Card>
+//       ) : (
+//         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+//           {filteredProjects.map((project) => (
+//             <Card
+//               key={project._id}
+//               className="hover:shadow-md transition-shadow"
+//             >
+//               <div className="flex items-start justify-between mb-3">
+//                 <span
+//                   className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(
+//                     project.status
+//                   )}`}
+//                 >
+//                   {getStatusText(project.status)}
+//                 </span>
+//                 <span className="px-2 py-1 bg-indigo-50 text-indigo-600 rounded text-xs font-medium capitalize">
+//                   {project.project_type}
+//                 </span>
+//               </div>
+//               <h3 className="text-lg font-semibold text-gray-800 mb-2">
+//                 {project.title}
+//               </h3>
+//               <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+//                 {project.description}
+//               </p>
+
+//               <div className="space-y-2 mb-4">
+//                 <div className="flex items-center text-sm text-gray-600">
+//                   <User size={16} className="mr-2" />
+//                   {project.mentorName}
+//                 </div>
+//                 <div className="flex items-center text-sm text-gray-600">
+//                   <Calendar size={16} className="mr-2" />
+//                   {project.start_date.split("T")[0]} To{" "}
+//                   {project.end_date.split("T")[0]}
+//                   {""}
+//                 </div>
+//               </div>
+
+//               <div className="flex flex-wrap gap-2 mb-4">
+//                 {project.technologies?.slice(0, 3).map((tech: any) => (
+//                   <span
+//                     key={tech}
+//                     className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
+//                   >
+//                     {tech}
+//                   </span>
+//                 ))}
+//                 {project.technologies && project.technologies.length > 3 && (
+//                   <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+//                     +{project.technologies.length - 3} more
+//                   </span>
+//                 )}
+//               </div>
+
+//               <Button
+//                 variant="outline"
+//                 className="w-full"
+//                 onClick={() => setSelectedProject(project)}
+//               >
+//                 <Eye size={16} className="mr-2" /> View Details
+//               </Button>
+//             </Card>
+//           ))}
+//         </div>
+//       )}
+
+//       <Modal
+//         isOpen={!!selectedProject}
+//         onClose={() => setSelectedProject(null)}
+//         title="Project Details"
+//         size="lg"
+//       >
+//         {selectedProject && (
+//           <div className="space-y-4">
+//             <div>
+//               <h3 className="text-xl font-bold text-gray-800">
+//                 {selectedProject.title}
+//               </h3>
+//               <div className="flex items-center space-x-3 mt-2">
+//                 <span
+//                   className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(
+//                     selectedProject.status
+//                   )}`}
+//                 >
+//                   {getStatusText(selectedProject.status)}
+//                 </span>
+//                 <span className="px-2 py-1 bg-indigo-50 text-indigo-600 rounded text-xs font-medium capitalize">
+//                   {selectedProject.project_type}
+//                 </span>
+//               </div>
+//             </div>
+
+//             {selectedProject.description && (
+//               <div>
+//                 <h4 className="font-semibold text-gray-700 mb-2">
+//                   Description
+//                 </h4>
+//                 <p className="text-gray-600">{selectedProject.description}</p>
+//               </div>
+//             )}
+
+//             {selectedProject.company && (
+//               <div>
+//                 <h4 className="font-semibold text-gray-700 mb-2">Company</h4>
+//                 <p className="text-gray-600">{selectedProject.company}</p>
+//               </div>
+//             )}
+
+//             <div>
+//               <h4 className="font-semibold text-gray-700 mb-2">Duration</h4>
+//               <p className="text-gray-600">
+//                 {selectedProject.start_date.split("T")[0]} To{" "}
+//                 {selectedProject.end_date.split("T")[0]}
+//                 {""}
+//               </p>
+//             </div>
+
+//             <div>
+//               <h4 className="font-semibold text-gray-700 mb-2">Mentor</h4>
+//               <p className="text-gray-600">{selectedProject.mentorName}</p>
+//             </div>
+
+//             {selectedProject.technologies && (
+//               <div>
+//                 <h4 className="font-semibold text-gray-700 mb-2">
+//                   Technologies
+//                 </h4>
+//                 <div className="flex flex-wrap gap-2">
+//                   {selectedProject.technologies.map((tech: any) => (
+//                     <span
+//                       key={tech}
+//                       className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+//                     >
+//                       {tech}
+//                     </span>
+//                   ))}
+//                 </div>
+//               </div>
+//             )}
+
+//             {selectedProject.feedback && (
+//               <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+//                 <h4 className="font-semibold text-indigo-800 mb-2">
+//                   Mentor Feedback
+//                 </h4>
+//                 <p className="text-indigo-900">{selectedProject.feedback}</p>
+//                 <p className="text-xs text-indigo-600 mt-2">
+//                   {selectedProject.feedbackDate
+//                     ? new Date(
+//                         selectedProject.feedbackDate
+//                       ).toLocaleDateString()
+//                     : "N/A"}
+//                 </p>
+//               </div>
+//             )}
+//           </div>
+//         )}
+//       </Modal>
+//     </div>
+//   );
+// };
+
+// export default StudentProjects;
+
+
+
+
+
+
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -9,20 +309,21 @@ import Button from "@/app/components/Button";
 import Card from "@/app/components/Card";
 import Modal from "@/app/components/Modal";
 
-interface Project {
-  id: number;
+type Project = {
+  _id: string;
   title: string;
   description: string;
-  type: "project" | "internship";
+  mentor_id: string;
+  mentorName?: string;
+  project_type: "project" | "internship";
   status: "approved" | "under_review" | "needs_improvement" | "pending";
-  mentorName: string;
-  startDate?: string;
-  endDate?: string;
-  company?: string;
-  technologies?: string[];
+  start_date: string;
+  end_date: string;
   feedback?: string;
   feedbackDate?: string;
-}
+  technologies?: string[];
+  company?: string;
+};
 
 const StudentProjects: React.FC = () => {
   const { user } = useAuth();
@@ -36,11 +337,31 @@ const StudentProjects: React.FC = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       if (!user?.id) return;
+
       try {
-        const response = await axios.get<Project[]>(
-          `http://127.0.0.1:5000/api/projects/student/${user?.id}`
+        const response = await axios.get(
+          `http://127.0.0.1:5000/api/projects/student/${user.id}`
         );
-        setProjects(response.data);
+
+        const projects: Project[] = response.data.data;
+
+        const projectsWithMentors = await Promise.all(
+          projects.map(async (project) => {
+            try {
+              const mentorRes = await axios.get(
+                `http://127.0.0.1:5000/api/mentors/${project.mentor_id}`
+              );
+              return {
+                ...project,
+                mentorName: mentorRes.data.mentor.name,
+              };
+            } catch {
+              return { ...project, mentorName: "Unknown" };
+            }
+          })
+        );
+
+        setProjects(projectsWithMentors);
       } catch (error) {
         console.error("Error fetching projects:", error);
       } finally {
@@ -54,24 +375,23 @@ const StudentProjects: React.FC = () => {
   const filteredProjects =
     filterType === "all"
       ? projects
-      : projects.filter((p) => p.type === filterType);
+      : projects.filter((p) => p.project_type === filterType);
 
   const getStatusBadge = (status: Project["status"]) => {
-    const badges: Record<Project["status"] | "pending", string> = {
+    const classes: Record<Project["status"], string> = {
       approved: "bg-green-100 text-green-700",
       under_review: "bg-yellow-100 text-yellow-700",
       needs_improvement: "bg-red-100 text-red-700",
       pending: "bg-gray-100 text-gray-700",
     };
-    return badges[status] || badges.pending;
+    return classes[status] || classes.pending;
   };
 
-  const getStatusText = (status: Project["status"]) => {
-    return status
+  const getStatusText = (status: Project["status"]) =>
+    status
       .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(" ");
-  };
 
   if (loading) return <div>Loading...</div>;
 
@@ -86,6 +406,7 @@ const StudentProjects: React.FC = () => {
         </p>
       </div>
 
+      {/* Filter Buttons */}
       <div className="flex flex-wrap gap-3">
         <Button
           variant={filterType === "all" ? "primary" : "secondary"}
@@ -93,20 +414,25 @@ const StudentProjects: React.FC = () => {
         >
           All ({projects.length})
         </Button>
+
         <Button
           variant={filterType === "project" ? "primary" : "secondary"}
           onClick={() => setFilterType("project")}
         >
-          Projects ({projects.filter((p) => p.type === "project").length})
+          Projects (
+          {projects.filter((p) => p.project_type === "project").length})
         </Button>
+
         <Button
           variant={filterType === "internship" ? "primary" : "secondary"}
           onClick={() => setFilterType("internship")}
         >
-          Internships ({projects.filter((p) => p.type === "internship").length})
+          Internships (
+          {projects.filter((p) => p.project_type === "internship").length})
         </Button>
       </div>
 
+      {/* No Data */}
       {filteredProjects.length === 0 ? (
         <Card>
           <p className="text-gray-500 text-center py-12">
@@ -117,9 +443,10 @@ const StudentProjects: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProjects.map((project) => (
             <Card
-              key={project.id}
+              key={project._id}
               className="hover:shadow-md transition-shadow"
             >
+              {/* Status and type */}
               <div className="flex items-start justify-between mb-3">
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(
@@ -128,13 +455,16 @@ const StudentProjects: React.FC = () => {
                 >
                   {getStatusText(project.status)}
                 </span>
+
                 <span className="px-2 py-1 bg-indigo-50 text-indigo-600 rounded text-xs font-medium capitalize">
-                  {project.type}
+                  {project.project_type}
                 </span>
               </div>
+
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
                 {project.title}
               </h3>
+
               <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                 {project.description}
               </p>
@@ -144,18 +474,15 @@ const StudentProjects: React.FC = () => {
                   <User size={16} className="mr-2" />
                   {project.mentorName}
                 </div>
+
                 <div className="flex items-center text-sm text-gray-600">
                   <Calendar size={16} className="mr-2" />
-                  {project.startDate
-                    ? new Date(project.startDate).toLocaleDateString()
-                    : "N/A"}{" "}
-                  -{" "}
-                  {project.endDate
-                    ? new Date(project.endDate).toLocaleDateString()
-                    : "N/A"}
+                  {project.start_date?.split("T")[0]} To{" "}
+                  {project.end_date?.split("T")[0]}
                 </div>
               </div>
 
+              {/* Tech */}
               <div className="flex flex-wrap gap-2 mb-4">
                 {project.technologies?.slice(0, 3).map((tech) => (
                   <span
@@ -165,11 +492,13 @@ const StudentProjects: React.FC = () => {
                     {tech}
                   </span>
                 ))}
-                {project.technologies && project.technologies.length > 3 && (
-                  <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
-                    +{project.technologies.length - 3} more
-                  </span>
-                )}
+
+                {project.technologies &&
+                  project.technologies.length > 3 && (
+                    <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                      +{project.technologies.length - 3} more
+                    </span>
+                  )}
               </div>
 
               <Button
@@ -184,6 +513,7 @@ const StudentProjects: React.FC = () => {
         </div>
       )}
 
+      {/* Modal */}
       <Modal
         isOpen={!!selectedProject}
         onClose={() => setSelectedProject(null)}
@@ -204,8 +534,9 @@ const StudentProjects: React.FC = () => {
                 >
                   {getStatusText(selectedProject.status)}
                 </span>
+
                 <span className="px-2 py-1 bg-indigo-50 text-indigo-600 rounded text-xs font-medium capitalize">
-                  {selectedProject.type}
+                  {selectedProject.project_type}
                 </span>
               </div>
             </div>
@@ -229,13 +560,8 @@ const StudentProjects: React.FC = () => {
             <div>
               <h4 className="font-semibold text-gray-700 mb-2">Duration</h4>
               <p className="text-gray-600">
-                {selectedProject.startDate
-                  ? new Date(selectedProject.startDate).toLocaleDateString()
-                  : "N/A"}{" "}
-                -{" "}
-                {selectedProject.endDate
-                  ? new Date(selectedProject.endDate).toLocaleDateString()
-                  : "N/A"}
+                {selectedProject.start_date?.split("T")[0]} To{" "}
+                {selectedProject.end_date?.split("T")[0]}
               </p>
             </div>
 
