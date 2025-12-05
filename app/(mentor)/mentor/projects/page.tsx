@@ -9,48 +9,19 @@ import Button from "@/app/components/Button";
 import Card from "@/app/components/Card";
 import Modal from "@/app/components/Modal";
 
-// interface Project {
-//   id: string;
-//   title: string;
-//   description: string;
-//   status: "approved" | "needs_improvement" | "Submitted" | string;
-//   grade?: string;
-//   feedback?: string;
-//   project_type: string;
-//   student_name: string;
-//   upload_date?: string;
-//   start_date?: string;
-//   end_date?: string;
-//   company_name?: string;
-//   github_link?: string;
-//   certificate_path?: string;
-//   technologies?: string[];
-// }
-
-// interface Mentor {
-//   id: string;
-// }
-
-// interface ReviewForm {
-//   feedback: string;
-//   status: string;
-//   grade: string;
-// }
-
 const MentorProjects: React.FC = () => {
   const { user } = useAuth();
-  // as { user: Mentor | null };
   const [projects, setProjects] = useState<any[]>([]);
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<
     "all" | "approved" | "needs_improvement" | "Submitted"
   >("all");
-  // const [reviewForm, setReviewForm] = useState<ReviewForm>({
-  //   feedback: "",
-  //   status: "approved",
-  //   grade: "A",
-  // });
+  const [reviewForm, setReviewForm] = useState<ReviewForm>({
+    feedback: "",
+    status: "approved",
+    grade: "A",
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,7 +44,7 @@ const MentorProjects: React.FC = () => {
 
               return {
                 ...project,
-                studentName: mentorRes.data?.student?.name || "Unknown",
+                studentName: mentorRes.data?.data?.name || "Unknown",
               };
             } catch {
               return {
@@ -120,41 +91,41 @@ const MentorProjects: React.FC = () => {
       .join(" ");
   };
 
-  // const handleReview = (project: Project) => {
-  //   setSelectedProject(project);
-  //   setReviewForm({
-  //     feedback: project.feedback || "",
-  //     status: project.status,
-  //     grade: project.grade || "A",
-  //   });
-  //   setIsReviewModalOpen(true);
-  // };
+  const handleReview = (project: Project) => {
+    setSelectedProject(project);
+    setReviewForm({
+      feedback: project.feedback || "",
+      status: project.status,
+      grade: project.grade || "A",
+    });
+    setIsReviewModalOpen(true);
+  };
 
-  // const handleSubmitReview = async (e: FormEvent) => {
-  //   e.preventDefault();
-  //   if (!selectedProject || !user?.id) return;
-  //   try {
-  //     await axios.post(
-  //       `http://127.0.0.1:5000/api/projects/${selectedProject.id}/feedbacks`,
-  //       {
-  //         mentor_id: user.id,
-  //         grade: reviewForm.grade,
-  //         remarks: reviewForm.feedback,
-  //       }
-  //     );
-  //     setIsReviewModalOpen(false);
-  //     setSelectedProject(null);
-  //     setReviewForm({ feedback: "", status: "approved", grade: "A" });
-  //     // Refresh projects
-  //     const res = await axios.get<Project[]>(
-  //       `http://127.0.0.1:5000/api/mentors/${user.id}/projects`
-  //     );
-  //     setProjects(res.data || []);
-  //   } catch (err) {
-  //     console.error("Error submitting feedback:", err);
-  //     setError("Failed to submit feedback. Please try again later.");
-  //   }
-  // };
+  const handleSubmitReview = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!selectedProject || !user?._id) return;
+    try {
+      await axios.post(
+        `http://127.0.0.1:5000/api/projects/${selectedProject.id}/feedbacks`,
+        {
+          mentor_id: user._id,
+          grade: reviewForm.grade,
+          remarks: reviewForm.feedback,
+        }
+      );
+      setIsReviewModalOpen(false);
+      setSelectedProject(null);
+      setReviewForm({ feedback: "", status: "approved", grade: "A" });
+      // Refresh projects
+      const res = await axios.get<any[]>(
+        `http://127.0.0.1:5000/api/projects/mentor/${user.id}`
+      );
+      setProjects(res.data.data || []);
+    } catch (err) {
+      console.error("Error submitting feedback:", err);
+      setError("Failed to submit feedback. Please try again later.");
+    }
+  };
 
   if (loading) return <div className="text-center py-8">Loading...</div>;
   if (error)
@@ -313,7 +284,7 @@ const MentorProjects: React.FC = () => {
             </div>
             <div>
               <h4 className="font-semibold text-gray-700 mb-2">Student</h4>
-              <p className="text-gray-600">{selectedProject.student_name}</p>
+              <p className="text-gray-600">{selectedProject.studentName}</p>
             </div>
             <div>
               <h4 className="font-semibold text-gray-700 mb-2">Description</h4>
@@ -399,7 +370,7 @@ const MentorProjects: React.FC = () => {
         )}
       </Modal>
 
-      {/* <Modal
+      <Modal
         isOpen={isReviewModalOpen}
         onClose={() => {
           setIsReviewModalOpen(false);
@@ -408,16 +379,19 @@ const MentorProjects: React.FC = () => {
         title="Provide Feedback"
         size="md"
       >
-        <form onSubmit={handleSubmitReview} className="space-y-4">
+        <form
+          // onSubmit={handleSubmitReview}
+          className="space-y-4"
+        >
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Status <span className="text-red-500">*</span>
             </label>
             <select
-              value={reviewForm.status}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-                setReviewForm({ ...reviewForm, status: e.target.value })
-              }
+              // value={reviewForm.status}
+              // onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+              //   setReviewForm({ ...reviewForm, status: e.target.value })
+              // }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
               required
             >
@@ -431,10 +405,10 @@ const MentorProjects: React.FC = () => {
               Grade <span className="text-red-500">*</span>
             </label>
             <select
-              value={reviewForm.grade}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-                setReviewForm({ ...reviewForm, grade: e.target.value })
-              }
+              // value={reviewForm.grade}
+              // onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+              //   setReviewForm({ ...reviewForm, grade: e.target.value })
+              // }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
               required
             >
@@ -457,10 +431,10 @@ const MentorProjects: React.FC = () => {
             </label>
             <textarea
               id="feedback"
-              value={reviewForm.feedback}
-              onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-                setReviewForm({ ...reviewForm, feedback: e.target.value })
-              }
+              // value={reviewForm.feedback}
+              // onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+              //   setReviewForm({ ...reviewForm, feedback: e.target.value })
+              // }
               placeholder="Provide detailed feedback to the student"
               rows={5}
               required
@@ -483,7 +457,7 @@ const MentorProjects: React.FC = () => {
             </Button>
           </div>
         </form>
-      </Modal> */}
+      </Modal>
     </div>
   );
 };

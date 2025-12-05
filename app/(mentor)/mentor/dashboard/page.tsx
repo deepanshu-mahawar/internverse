@@ -19,6 +19,7 @@ const MentorDashboard: React.FC = () => {
     const fetchData = async () => {
       if (!user?._id) return;
 
+      console.log("Fetching data for mentor ID:", user._id);
       setLoading(true);
       setError(null);
 
@@ -36,9 +37,11 @@ const MentorDashboard: React.FC = () => {
                 `http://127.0.0.1:5000/api/students/${project.student_id}`
               );
 
+              console.log("Fetched student data:", mentorRes.data);
+
               return {
                 ...project,
-                studentName: mentorRes.data?.student?.name || "Unknown",
+                studentName: mentorRes.data?.data?.name || "Unknown",
               };
             } catch {
               return {
@@ -60,8 +63,9 @@ const MentorDashboard: React.FC = () => {
           return;
         }
 
-        const studentsRes = await axios.get<any[]>(
-          `http://127.0.0.1:5000/api/students/${studentIds}`
+        const studentsRes = await axios.post(
+          "http://127.0.0.1:5000/api/students/many",
+          { ids: studentIds }
         );
 
         setStudents(studentsRes.data.data || []);
@@ -257,7 +261,7 @@ const MentorDashboard: React.FC = () => {
                 );
                 return (
                   <div
-                    key={student.id}
+                    key={student._id}
                     className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                   >
                     <div className="flex items-center space-x-3">
