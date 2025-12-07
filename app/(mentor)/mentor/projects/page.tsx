@@ -19,8 +19,8 @@ const MentorProjects: React.FC = () => {
   >("all");
   const [reviewForm, setReviewForm] = useState<ReviewForm>({
     feedback: "",
-    status: "approved",
-    grade: "A",
+    status: "",
+    grade: "",
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -110,6 +110,7 @@ const MentorProjects: React.FC = () => {
           mentor_id: user._id,
           grade: reviewForm.grade,
           remarks: reviewForm.feedback,
+          status: reviewForm.status,
         }
       );
       setIsReviewModalOpen(false);

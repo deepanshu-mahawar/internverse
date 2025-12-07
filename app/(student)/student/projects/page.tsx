@@ -295,9 +295,9 @@ const StudentProjects: React.FC = () => {
                 </h4>
                 <p className="text-indigo-900">{selectedProject.feedback}</p>
                 <p className="text-xs text-indigo-600 mt-2">
-                  {selectedProject.feedbackDate
+                  {selectedProject.updatedAt
                     ? new Date(
-                        selectedProject.feedbackDate
+                        selectedProject.updatedAt
                       ).toLocaleDateString()
                     : "N/A"}
                 </p>
