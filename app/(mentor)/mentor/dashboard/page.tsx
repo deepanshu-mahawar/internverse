@@ -19,7 +19,6 @@ const MentorDashboard: React.FC = () => {
     const fetchData = async () => {
       if (!user?._id) return;
 
-      console.log("Fetching data for mentor ID:", user._id);
       setLoading(true);
       setError(null);
 
@@ -37,7 +36,7 @@ const MentorDashboard: React.FC = () => {
                 `http://127.0.0.1:5000/api/students/${project.student_id}`
               );
 
-              console.log("Fetched student data:", mentorRes.data);
+            
 
               return {
                 ...project,

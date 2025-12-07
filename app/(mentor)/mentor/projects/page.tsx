@@ -66,8 +66,6 @@ const MentorProjects: React.FC = () => {
     fetchProjects();
   }, [user?.id]);
 
-  console.log("projects", projects);
-
   const myProjects = projects;
 
   const filteredProjects =
@@ -104,9 +102,10 @@ const MentorProjects: React.FC = () => {
   const handleSubmitReview = async (e: FormEvent) => {
     e.preventDefault();
     if (!selectedProject || !user?._id) return;
+    console.log("Submitting review:", selectedProject);
     try {
       await axios.post(
-        `http://127.0.0.1:5000/api/projects/${selectedProject.id}/feedbacks`,
+        `http://127.0.0.1:5000/api/projects/${selectedProject._id}/feedbacks`,
         {
           mentor_id: user._id,
           grade: reviewForm.grade,
@@ -118,9 +117,31 @@ const MentorProjects: React.FC = () => {
       setReviewForm({ feedback: "", status: "approved", grade: "A" });
       // Refresh projects
       const res = await axios.get<any[]>(
-        `http://127.0.0.1:5000/api/projects/mentor/${user.id}`
+        `http://127.0.0.1:5000/api/projects/mentor/${user._id}`
       );
-      setProjects(res.data.data || []);
+      const projectsData = res.data.data || [];
+
+      const projectsWithMentors = await Promise.all(
+        projectsData.map(async (project: any) => {
+          try {
+            const mentorRes = await axios.get(
+              `http://127.0.0.1:5000/api/students/${project.student_id}`
+            );
+
+            return {
+              ...project,
+              studentName: mentorRes.data?.data?.name || "Unknown",
+            };
+          } catch {
+            return {
+              ...project,
+              studentName: "Unknown",
+            };
+          }
+        })
+      );
+
+      setProjects(projectsWithMentors);
     } catch (err) {
       console.error("Error submitting feedback:", err);
       setError("Failed to submit feedback. Please try again later.");
@@ -180,7 +201,7 @@ const MentorProjects: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {filteredProjects.map((project) => (
             <Card
-              key={project.id}
+              key={project._id}
               className="hover:shadow-md transition-shadow"
             >
               <div className="space-y-4">
@@ -379,19 +400,16 @@ const MentorProjects: React.FC = () => {
         title="Provide Feedback"
         size="md"
       >
-        <form
-          // onSubmit={handleSubmitReview}
-          className="space-y-4"
-        >
+        <form onSubmit={handleSubmitReview} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Status <span className="text-red-500">*</span>
             </label>
             <select
-              // value={reviewForm.status}
-              // onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-              //   setReviewForm({ ...reviewForm, status: e.target.value })
-              // }
+              value={reviewForm.status}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                setReviewForm({ ...reviewForm, status: e.target.value })
+              }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
               required
             >
@@ -405,10 +423,10 @@ const MentorProjects: React.FC = () => {
               Grade <span className="text-red-500">*</span>
             </label>
             <select
-              // value={reviewForm.grade}
-              // onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-              //   setReviewForm({ ...reviewForm, grade: e.target.value })
-              // }
+              value={reviewForm.grade}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                setReviewForm({ ...reviewForm, grade: e.target.value })
+              }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
               required
             >
@@ -431,10 +449,10 @@ const MentorProjects: React.FC = () => {
             </label>
             <textarea
               id="feedback"
-              // value={reviewForm.feedback}
-              // onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-              //   setReviewForm({ ...reviewForm, feedback: e.target.value })
-              // }
+              value={reviewForm.feedback}
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                setReviewForm({ ...reviewForm, feedback: e.target.value })
+              }
               placeholder="Provide detailed feedback to the student"
               rows={5}
               required

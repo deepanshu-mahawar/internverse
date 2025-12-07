@@ -1,5 +1,4 @@
-"use client"
-
+"use client";
 
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 
@@ -10,34 +9,10 @@ import Card from "@/app/components/Card";
 import Input from "@/app/components/Input";
 import Button from "@/app/components/Button";
 
-interface Mentor {
-  id: string;
-  name: string;
-  email: string;
-  department: string;
-  specialization: string;
-  phone?: string;
-  expertise?: string;
-  experience?: string;
-  company?: string;
-  role?: string;
-}
-
-interface FormData {
-  name: string;
-  email: string;
-  department: string;
-  specialization: string;
-  phone: string;
-  expertise: string;
-  experience: string;
-  company: string;
-}
-
 const MentorProfile: React.FC = () => {
-  const { user } = useAuth() as { user: Mentor | null };
+  const { user } = useAuth() as { user: any };
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<any>({
     name: user?.name || "",
     email: user?.email || "",
     department: user?.department || "",
@@ -52,20 +27,21 @@ const MentorProfile: React.FC = () => {
 
   useEffect(() => {
     const fetchMentorDetails = async () => {
-      if (!user?.id) return;
+      if (!user?._id) return;
       try {
-        const res = await axios.get<Mentor>(
-          `http://127.0.0.1:5000/api/mentors/${user.id}`
+        const res = await axios.get<any>(
+          `http://127.0.0.1:5000/api/mentors/${user._id}`
         );
+        console.log("Fetched mentor details:", res.data.mentor);
         setFormData({
-          name: res.data.name,
-          email: res.data.email,
-          department: res.data.department,
-          specialization: res.data.specialization,
-          phone: res.data.phone || "",
-          expertise: res.data.expertise || "",
-          experience: res.data.experience || "",
-          company: res.data.company || "",
+          name: res.data.mentor.name,
+          email: res.data.mentor.email,
+          department: res.data.mentor.department,
+          specialization: res.data.mentor.specialization,
+          phone: res.data.mentor.phone || "",
+          expertise: res.data.mentor.expertise || "",
+          experience: res.data.mentor.experience || "",
+          company: res.data.mentor.company || "",
         });
       } catch (err) {
         console.error("Error fetching mentor details:", err);
@@ -75,11 +51,11 @@ const MentorProfile: React.FC = () => {
       }
     };
     fetchMentorDetails();
-  }, [user?.id]);
+  }, [user?._id]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: FormEvent) => {
