@@ -1,17 +1,24 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
-import { MessageSquare, Calendar, User, CheckCircle, XCircle, Clock } from 'lucide-react';
-import axios from 'axios';
-import { useAuth } from '@/app/context/AuthContext';
-import Card from '@/app/components/Card';
+import {
+  MessageSquare,
+  Calendar,
+  User,
+  CheckCircle,
+  XCircle,
+  Clock,
+} from "lucide-react";
+import axios from "axios";
+import { useAuth } from "@/app/context/AuthContext";
+import Card from "@/app/components/Card";
 
 interface Project {
   id: string;
   title: string;
-  type: 'internship' | 'project';
-  status: 'approved' | 'under_review' | 'needs_improvement' | 'pending';
+  type: "internship" | "project";
+  status: "approved" | "under_review" | "needs_improvement" | "pending";
   feedback?: string;
   feedbackDate?: string;
   submittedDate?: string;
@@ -29,11 +36,35 @@ const Feedback: React.FC = () => {
       if (!user?.id) return;
       try {
         const response = await axios.get<Project[]>(
-          `http://127.0.0.1:5000/api/students/${user.id}/projects`
+          `http://127.0.0.1:5000/api/projects/student/${user.id}`
         );
-        setProjects(response.data);
+
+        const projectList = response.data.data || [];
+
+        // Fetch mentor for each project
+        const projectsWithMentors = await Promise.all(
+          projectList.map(async (project: any) => {
+            try {
+              const mentorRes = await axios.get(
+                `http://127.0.0.1:5000/api/mentors/${project.mentor_id}`
+              );
+
+              return {
+                ...project,
+                mentorName: mentorRes.data?.mentor?.name || "Unknown",
+              };
+            } catch {
+              return {
+                ...project,
+                mentorName: "Unknown",
+              };
+            }
+          })
+        );
+
+        setProjects(projectsWithMentors);
       } catch (error) {
-        console.error('Error fetching projects:', error);
+        console.error("Error fetching projects:", error);
       } finally {
         setLoading(false);
       }
@@ -42,37 +73,41 @@ const Feedback: React.FC = () => {
     fetchProjects();
   }, [user?.id]);
 
-  const projectsWithFeedback = projects.filter((p) => p.feedback);
-  const pendingFeedback = projects.filter((p) => !p.feedback && p.submittedDate);
+  console.log("Fetched projects with feedback:", projects);
 
-  const getStatusIcon = (status: Project['status']) => {
+  const projectsWithFeedback = projects.filter((p) => p.feedback);
+  const pendingFeedback = projects.filter(
+    (p) => !p.feedback && p.submittedDate
+  );
+
+  const getStatusIcon = (status: Project["status"]) => {
     switch (status) {
-      case 'approved':
+      case "approved":
         return <CheckCircle className="text-green-600" size={20} />;
-      case 'needs_improvement':
+      case "needs_improvement":
         return <XCircle className="text-red-600" size={20} />;
-      case 'under_review':
+      case "under_review":
         return <Clock className="text-yellow-600" size={20} />;
       default:
         return <Clock className="text-gray-600" size={20} />;
     }
   };
 
-  const getStatusBadge = (status: Project['status']) => {
-    const badges: Record<Project['status'] | 'pending', string> = {
-      approved: 'bg-green-100 text-green-700',
-      under_review: 'bg-yellow-100 text-yellow-700',
-      needs_improvement: 'bg-red-100 text-red-700',
-      pending: 'bg-gray-100 text-gray-700',
+  const getStatusBadge = (status: Project["status"]) => {
+    const badges: Record<Project["status"] | "pending", string> = {
+      approved: "bg-green-100 text-green-700",
+      under_review: "bg-yellow-100 text-yellow-700",
+      needs_improvement: "bg-red-100 text-red-700",
+      pending: "bg-gray-100 text-gray-700",
     };
     return badges[status] || badges.pending;
   };
 
   const getStatusText = (status: string) =>
     status
-      .split('_')
+      .split("_")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+      .join(" ");
 
   if (loading) return <div>Loading...</div>;
 
@@ -88,7 +123,9 @@ const Feedback: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total Feedback</p>
-              <p className="text-2xl font-bold text-gray-800 mt-1">{projectsWithFeedback.length}</p>
+              <p className="text-2xl font-bold text-gray-800 mt-1">
+                {projectsWithFeedback.length}
+              </p>
             </div>
             <MessageSquare className="text-indigo-600" size={32} />
           </div>
@@ -98,7 +135,9 @@ const Feedback: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Pending Feedback</p>
-              <p className="text-2xl font-bold text-gray-800 mt-1">{pendingFeedback.length}</p>
+              <p className="text-2xl font-bold text-gray-800 mt-1">
+                {pendingFeedback.length}
+              </p>
             </div>
             <Clock className="text-yellow-600" size={32} />
           </div>
@@ -109,7 +148,7 @@ const Feedback: React.FC = () => {
             <div>
               <p className="text-sm text-gray-600">Approved</p>
               <p className="text-2xl font-bold text-gray-800 mt-1">
-                {projects.filter((p) => p.status === 'approved').length}
+                {projects.filter((p) => p.status === "approved").length}
               </p>
             </div>
             <CheckCircle className="text-green-600" size={32} />
@@ -118,21 +157,27 @@ const Feedback: React.FC = () => {
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Received Feedback</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          Received Feedback
+        </h2>
         {projectsWithFeedback.length === 0 ? (
           <Card>
-            <p className="text-gray-500 text-center py-12">No feedback received yet</p>
+            <p className="text-gray-500 text-center py-12">
+              No feedback received yet
+            </p>
           </Card>
         ) : (
           <div className="space-y-4">
             {projectsWithFeedback.map((project) => (
-              <Card key={project.id}>
+              <Card key={project._id}>
                 <div className="space-y-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
                         {getStatusIcon(project.status)}
-                        <h3 className="text-lg font-semibold text-gray-800">{project.title}</h3>
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          {project.title}
+                        </h3>
                       </div>
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(
@@ -154,7 +199,11 @@ const Feedback: React.FC = () => {
                       {project.feedbackDate && (
                         <>
                           <Calendar size={16} className="ml-4 mr-2" />
-                          <span>{new Date(project.feedbackDate).toLocaleDateString()}</span>
+                          <span>
+                            {new Date(
+                              project.feedbackDate
+                            ).toLocaleDateString()}
+                          </span>
                         </>
                       )}
                     </div>
@@ -163,7 +212,10 @@ const Feedback: React.FC = () => {
 
                   <div className="flex flex-wrap gap-2">
                     {project.technologies.map((tech) => (
-                      <span key={tech} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                      <span
+                        key={tech}
+                        className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
+                      >
                         {tech}
                       </span>
                     ))}
@@ -177,15 +229,19 @@ const Feedback: React.FC = () => {
 
       {pendingFeedback.length > 0 && (
         <div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Awaiting Feedback</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Awaiting Feedback
+          </h2>
           <div className="space-y-4">
             {pendingFeedback.map((project) => (
               <Card key={project.id}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-1">{project.title}</h3>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                      {project.title}
+                    </h3>
                     <p className="text-sm text-gray-600">
-                      Submitted to {project.mentorName} on{' '}
+                      Submitted to {project.mentorName} on{" "}
                       {project.submittedDate &&
                         new Date(project.submittedDate).toLocaleDateString()}
                     </p>

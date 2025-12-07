@@ -9,23 +9,14 @@ import Card from "@/app/components/Card";
 import Input from "@/app/components/Input";
 import Button from "@/app/components/Button";
 
-interface FormData {
-  name: string;
-  email: string;
-  studentId: string;
-  department: string;
-  year: string;
-  phone: string;
-}
-
 const StudentProfile: React.FC = () => {
   const { user } = useAuth();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<any>({
     name: user?.name || "",
     email: user?.email || "",
-    studentId: user?.studentId || "",
+    studentId: user?.id || "",
     department: user?.department || "",
     year: user?.year || "",
     phone: user?.phone || "",
@@ -33,7 +24,7 @@ const StudentProfile: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,7 +46,7 @@ const StudentProfile: React.FC = () => {
     setFormData({
       name: user?.name || "",
       email: user?.email || "",
-      studentId: user?.studentId || "",
+      studentId: user?.id || "",
       department: user?.department || "",
       year: user?.year || "",
       phone: user?.phone || "",
@@ -106,6 +97,7 @@ const StudentProfile: React.FC = () => {
                 onChange={handleChange}
                 disabled={!isEditing}
                 icon={Hash}
+                readOnly
               />
               <Input
                 label="Department"
@@ -176,7 +168,7 @@ const StudentProfile: React.FC = () => {
           </div>
           <div className="text-center">
             <p className="text-2xl font-bold text-indigo-600">
-              {user?.department.split(" ")[0]}
+              {user?.department}
             </p>
             <p className="text-sm text-gray-600 mt-1">Department</p>
           </div>
