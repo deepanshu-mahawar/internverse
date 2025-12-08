@@ -1,5 +1,4 @@
-"use client"
-
+"use client";
 
 import { useState, useEffect } from "react";
 
@@ -10,50 +9,87 @@ import Card from "@/app/components/Card";
 import Button from "@/app/components/Button";
 import Modal from "@/app/components/Modal";
 
-interface Student {
-  id: string;
-  name: string;
-  email: string;
-  department: string;
-  year: string;
-}
+// interface Student {
+//   id: string;
+//   name: string;
+//   email: string;
+//   department: string;
+//   year: string;
+// }
 
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  status: "approved" | "needs_improvement" | "Submitted" | string;
-  project_type: string;
-  student_id: string;
-  upload_date?: string;
-}
+// interface Project {
+//   id: string;
+//   title: string;
+//   description: string;
+//   status: "approved" | "needs_improvement" | "Submitted" | string;
+//   project_type: string;
+//   student_id: string;
+//   upload_date?: string;
+// }
 
-interface Mentor {
-  id: string;
-}
+// interface Mentor {
+//   id: string;
+// }
 
 const MentorStudents: React.FC = () => {
-  const { user } = useAuth() as { user: Mentor | null };
-  const [students, setStudents] = useState<Student[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const { user } = useAuth() as { user: any | null };
+  const [students, setStudents] = useState<any[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [selectedStudent, setSelectedStudent] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!user?.id) return;
+      if (!user?._id) return;
+
+      setLoading(true);
+      setError(null);
+
       try {
-        const [studentsRes, projectsRes] = await Promise.all([
-          axios.get<Student[]>(
-            `http://127.0.0.1:5000/api/mentors/${user.id}/students`
-          ),
-          axios.get<Project[]>(
-            `http://127.0.0.1:5000/api/mentors/${user.id}/projects`
-          ),
-        ]);
-        setStudents(studentsRes.data || []);
-        setProjects(projectsRes.data || []);
+        const projectsRes = await axios.get<any[]>(
+          `http://127.0.0.1:5000/api/projects/mentor/${user?._id}`
+        );
+
+        const projectsData = projectsRes.data.data || [];
+
+        const projectsWithMentors = await Promise.all(
+          projectsData.map(async (project: any) => {
+            try {
+              const mentorRes = await axios.get(
+                `http://127.0.0.1:5000/api/students/${project.student_id}`
+              );
+
+              return {
+                ...project,
+                studentName: mentorRes.data?.data?.name || "Unknown",
+              };
+            } catch {
+              return {
+                ...project,
+                studentName: "Unknown",
+              };
+            }
+          })
+        );
+
+        setProjects(projectsWithMentors);
+
+        const studentIds = Array.from(
+          new Set(projectsData.map((p) => p.student_id).filter(Boolean))
+        );
+
+        if (studentIds.length === 0) {
+          setStudents([]);
+          return;
+        }
+
+        const studentsRes = await axios.post(
+          "http://127.0.0.1:5000/api/students/many",
+          { ids: studentIds }
+        );
+
+        setStudents(studentsRes.data.data || []);
       } catch (err) {
         console.error("Error fetching data:", err);
         setError("Failed to load data. Please try again later.");
@@ -61,8 +97,12 @@ const MentorStudents: React.FC = () => {
         setLoading(false);
       }
     };
+
     fetchData();
-  }, [user?.id]);
+  }, [user?._id]);
+
+  console.log("student", students);
+  console.log("project", projects);
 
   const myStudents = students;
   const myProjects = projects;
@@ -149,7 +189,7 @@ const MentorStudents: React.FC = () => {
             ).length;
             return (
               <Card
-                key={student.id}
+                key={student._id}
                 className="hover:shadow-md transition-shadow"
               >
                 <div className="text-center mb-4">
@@ -159,7 +199,7 @@ const MentorStudents: React.FC = () => {
                   <h3 className="text-lg font-semibold text-gray-800">
                     {student.name}
                   </h3>
-                  <p className="text-sm text-gray-600">{student.id}</p>
+                  <p className="text-sm text-gray-600">{student._id}</p>
                 </div>
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center text-sm text-gray-600">
@@ -225,7 +265,7 @@ const MentorStudents: React.FC = () => {
                 <h3 className="text-2xl font-bold text-gray-800">
                   {selectedStudent.name}
                 </h3>
-                <p className="text-gray-600">{selectedStudent.id}</p>
+                <p className="text-gray-600">{selectedStudent._id}</p>
                 <p className="text-sm text-gray-600 mt-1">
                   {selectedStudent.email}
                 </p>

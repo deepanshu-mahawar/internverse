@@ -71,7 +71,6 @@ const FeedbackHistory: React.FC = () => {
     fetchProjects();
   }, [user?._id]);
 
-  console.log("projects", projects);
 
   if (loading) return <div className="text-center py-8">Loading...</div>;
   if (error)
