@@ -5,6 +5,9 @@ import { useState, ReactNode } from 'react';
 import { LayoutDashboard, Users, FolderOpen, Settings, User } from 'lucide-react';
 import Navbar from '@/app/components/Navbar';
 import Sidebar from '@/app/components/Sidebar';
+import { useAuth } from '@/app/context/AuthContext';
+import Loader from '@/app/components/Loader';
+import { redirect } from 'next/navigation';
 
 interface MenuItem {
   path: string;
@@ -18,6 +21,12 @@ interface AdminLayoutProps {
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    const { user, loading } = useAuth();
+
+  if (loading) return <Loader fullScreen />;
+  if (!user) redirect("/login/admin");
+  if (user.role !== "admin") redirect(`/${user.role}/dashboard`);
 
   const menuItems: MenuItem[] = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },

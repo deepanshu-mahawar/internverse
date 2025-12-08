@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect } from "react";
 
 import { Users, FolderOpen, UserCheck } from "lucide-react";
@@ -6,86 +8,86 @@ import { useAuth } from "@/app/context/AuthContext";
 import StatCard from "@/app/components/StatCard";
 import Card from "@/app/components/Card";
 
-interface UserType {
-  id: string;
-  name: string;
-  role: "student" | "mentor" | "admin";
-}
+// interface UserType {
+//   id: string;
+//   name: string;
+//   role: "student" | "mentor" | "admin";
+// }
 
-interface ProjectType {
-  id: string;
-  title: string;
-  student_name: string;
-  mentor_name: string;
-  status: "approved" | "Submitted" | "needs_improvement" | "pending" | string;
-  project_type: "internship" | "project" | string;
-  upload_date?: string;
-}
+// interface ProjectType {
+//   id: string;
+//   title: string;
+//   student_name: string;
+//   mentor_name: string;
+//   status: "approved" | "Submitted" | "needs_improvement" | "pending" | string;
+//   project_type: "internship" | "project" | string;
+//   upload_date?: string;
+// }
 
 const AdminDashboard: React.FC = () => {
-  const { user } = useAuth();
-  const [users, setUsers] = useState<UserType[]>([]);
-  const [projects, setProjects] = useState<ProjectType[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  // const { user } = useAuth();
+  // const [users, setUsers] = useState<UserType[]>([]);
+  // const [projects, setProjects] = useState<ProjectType[]>([]);
+  // const [loading, setLoading] = useState<boolean>(true);
+  // const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [usersRes, projectsRes] = await Promise.all([
-          axios.get<UserType[]>("http://127.0.0.1:5000/api/admin/users"),
-          axios.get<ProjectType[]>("http://127.0.0.1:5000/api/admin/projects"),
-        ]);
-        setUsers(usersRes.data);
-        setProjects(projectsRes.data);
-      } catch (err) {
-        console.error("Error fetching data:", err);
-        setError("Failed to load data. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const [usersRes, projectsRes] = await Promise.all([
+  //         axios.get<UserType[]>("http://127.0.0.1:5000/api/admin/users"),
+  //         axios.get<ProjectType[]>("http://127.0.0.1:5000/api/admin/projects"),
+  //       ]);
+  //       setUsers(usersRes.data);
+  //       setProjects(projectsRes.data);
+  //     } catch (err) {
+  //       console.error("Error fetching data:", err);
+  //       setError("Failed to load data. Please try again later.");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchData();
+  // }, []);
 
-  if (loading) return <div className="text-center py-8">Loading...</div>;
-  if (error)
-    return <div className="text-center py-8 text-red-500">{error}</div>;
-  if (!user)
-    return <div className="text-center py-8">Unauthorized. Please log in.</div>;
+  // if (loading) return <div className="text-center py-8">Loading...</div>;
+  // if (error)
+  //   return <div className="text-center py-8 text-red-500">{error}</div>;
+  // if (!user)
+  //   return <div className="text-center py-8">Unauthorized. Please log in.</div>;
 
-  const students = users.filter((u) => u.role === "student");
-  const mentors = users.filter((u) => u.role === "mentor");
-  const admins = users.filter((u) => u.role === "admin");
-  const totalProjects = projects.length;
-  const approvedProjects = projects.filter(
-    (p) => p.status === "approved"
-  ).length;
-  const underReview = projects.filter((p) => p.status === "Submitted").length;
-  const recentProjects = projects
-    .filter((p) => p.upload_date)
-    .sort(
-      (a, b) =>
-        new Date(b.upload_date!).getTime() - new Date(a.upload_date!).getTime()
-    )
-    .slice(0, 5);
+  // const students = users.filter((u) => u.role === "student");
+  // const mentors = users.filter((u) => u.role === "mentor");
+  // const admins = users.filter((u) => u.role === "admin");
+  // const totalProjects = projects.length;
+  // const approvedProjects = projects.filter(
+  //   (p) => p.status === "approved"
+  // ).length;
+  // const underReview = projects.filter((p) => p.status === "Submitted").length;
+  // const recentProjects = projects
+  //   .filter((p) => p.upload_date)
+  //   .sort(
+  //     (a, b) =>
+  //       new Date(b.upload_date!).getTime() - new Date(a.upload_date!).getTime()
+  //   )
+  //   .slice(0, 5);
 
-  const getStatusBadge = (status: ProjectType["status"]): string => {
-    const badges: Record<string, string> = {
-      approved: "bg-green-100 text-green-700",
-      Submitted: "bg-yellow-100 text-yellow-700",
-      needs_improvement: "bg-red-100 text-red-700",
-      pending: "bg-gray-100 text-gray-700",
-    };
-    return badges[status] || badges.pending;
-  };
+  // const getStatusBadge = (status: ProjectType["status"]): string => {
+  //   const badges: Record<string, string> = {
+  //     approved: "bg-green-100 text-green-700",
+  //     Submitted: "bg-yellow-100 text-yellow-700",
+  //     needs_improvement: "bg-red-100 text-red-700",
+  //     pending: "bg-gray-100 text-gray-700",
+  //   };
+  //   return badges[status] || badges.pending;
+  // };
 
-  const getStatusText = (status: ProjectType["status"]): string => {
-    return status
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  };
+  // const getStatusText = (status: ProjectType["status"]): string => {
+  //   return status
+  //     .split("_")
+  //     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+  //     .join(" ");
+  // };
 
   return (
     <div className="space-y-6">
@@ -94,7 +96,7 @@ const AdminDashboard: React.FC = () => {
         <p className="text-gray-600 mt-1">System overview and statistics</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Total Users"
           value={users.length}
@@ -119,9 +121,9 @@ const AdminDashboard: React.FC = () => {
           icon={FolderOpen}
           color="yellow"
         />
-      </div>
+      </div> */}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card title="Project Statistics">
           <div className="space-y-4">
             <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
@@ -221,9 +223,9 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
         </Card>
-      </div>
+      </div> */}
 
-      <Card title="Recent Submissions">
+      {/* <Card title="Recent Submissions">
         {recentProjects.length === 0 ? (
           <p className="text-gray-500 text-center py-8">No submissions yet</p>
         ) : (
@@ -281,7 +283,7 @@ const AdminDashboard: React.FC = () => {
             </table>
           </div>
         )}
-      </Card>
+      </Card> */}
     </div>
   );
 };

@@ -147,7 +147,7 @@ const Login = () => {
           </form>
 
           {/* Demo Creds */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          {/* <div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <p className="text-xs font-semibold text-gray-700 mb-2">
               Demo Credentials:
             </p>
@@ -156,7 +156,7 @@ const Login = () => {
               <br />
               Password: {role}123
             </p>
-          </div>
+          </div> */}
 
           {/* Role Switch */}
           <div className="mt-4 text-center text-sm text-gray-600">
