@@ -56,10 +56,10 @@ const StudentDashboard: React.FC = () => {
   }, [user?.id]);
 
   const activeInternships = projects.filter(
-    (p) => p.project_type === "internship" && p.status !== "completed"
+    (p) => p.project_type === "internship" && p.status !== "Submitted"
   );
 
-  const underReview = projects.filter((p) => p.status === "under_review");
+  const underReview = projects.filter((p) => p.status === "Submitted");
   const needsImprovement = projects.filter(
     (p) => p.status === "needs_improvement"
   );

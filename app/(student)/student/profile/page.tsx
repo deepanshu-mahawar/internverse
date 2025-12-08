@@ -31,7 +31,10 @@ const StudentProfile: React.FC = () => {
     if (!user?.id) return;
 
     try {
-      await axios.put(`http://127.0.0.1:5000/api/students/${user.id}`, formData);
+      await axios.put(
+        `http://127.0.0.1:5000/api/students/${user.id}`,
+        formData
+      );
       setIsEditing(false);
     } catch (error) {
       console.error("Error updating profile:", error);

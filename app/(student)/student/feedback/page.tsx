@@ -14,28 +14,16 @@ import axios from "axios";
 import { useAuth } from "@/app/context/AuthContext";
 import Card from "@/app/components/Card";
 
-interface Project {
-  id: string;
-  title: string;
-  type: "internship" | "project";
-  status: "approved" | "under_review" | "needs_improvement" | "pending";
-  feedback?: string;
-  feedbackDate?: string;
-  submittedDate?: string;
-  mentorName: string;
-  technologies: string[];
-}
-
 const Feedback: React.FC = () => {
   const { user } = useAuth();
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProjects = async () => {
       if (!user?.id) return;
       try {
-        const response = await axios.get<Project[]>(
+        const response = await axios.get<any[]>(
           `http://127.0.0.1:5000/api/projects/student/${user.id}`
         );
 
@@ -73,28 +61,26 @@ const Feedback: React.FC = () => {
     fetchProjects();
   }, [user?.id]);
 
-  console.log("Fetched projects with feedback:", projects);
-
   const projectsWithFeedback = projects.filter((p) => p.feedback);
   const pendingFeedback = projects.filter(
     (p) => !p.feedback && p.submittedDate
   );
 
-  const getStatusIcon = (status: Project["status"]) => {
+  const getStatusIcon = (status: any["status"]) => {
     switch (status) {
       case "approved":
         return <CheckCircle className="text-green-600" size={20} />;
       case "needs_improvement":
         return <XCircle className="text-red-600" size={20} />;
-      case "under_review":
+      case "Submitted":
         return <Clock className="text-yellow-600" size={20} />;
       default:
         return <Clock className="text-gray-600" size={20} />;
     }
   };
 
-  const getStatusBadge = (status: Project["status"]) => {
-    const badges: Record<Project["status"] | "pending", string> = {
+  const getStatusBadge = (status: any["status"]) => {
+    const badges: Record<any["status"] | "pending", string> = {
       approved: "bg-green-100 text-green-700",
       under_review: "bg-yellow-100 text-yellow-700",
       needs_improvement: "bg-red-100 text-red-700",
@@ -211,7 +197,7 @@ const Feedback: React.FC = () => {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {project.technologies.map((tech) => (
+                    {project.technologies.map((tech: any) => (
                       <span
                         key={tech}
                         className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"

@@ -162,7 +162,7 @@ const Upload: React.FC = () => {
         setShowSuccess(true);
         setTimeout(() => {
           setShowSuccess(false);
-          router.replace("/student/projects"); // ⬅️ replace instead of push
+          router.replace("/student/dashboard"); // ⬅️ replace instead of push
         }, 2000);
 
         // reset form

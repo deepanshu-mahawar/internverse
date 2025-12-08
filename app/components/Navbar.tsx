@@ -49,15 +49,11 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
             <div className="relative">
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center space-x-3 hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors"
+                className="flex items-center gap-2 space-x-3 hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors"
               >
-                {user.avatar && (
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="w-8 h-8 rounded-full"
-                  />
-                )}
+                <div className="w-8 h-8 rounded-full mx-auto  bg-indigo-100 flex items-center justify-center">
+                  <User className="text-indigo-600" size={20} />
+                </div>
                 <div className="hidden md:block text-left">
                   <p className="text-sm font-medium text-gray-800">
                     {user.name}
