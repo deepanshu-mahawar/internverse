@@ -7,6 +7,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import Card from "@/app/components/Card";
 import Input from "@/app/components/Input";
 import Button from "@/app/components/Button";
+import { useRouter } from "next/navigation";
 
 interface Mentor {
   id: string;
@@ -33,6 +34,7 @@ interface FormErrors {
 
 const Upload: React.FC = () => {
   const { user } = useAuth();
+  const router = useRouter();
 
   const [showSuccess, setShowSuccess] = useState(false);
   const [mentors, setMentors] = useState<Mentor[]>([]);
@@ -69,9 +71,7 @@ const Upload: React.FC = () => {
 
   // ---------------- INPUT CHANGE ------------------
   const handleChange = (
-    e: ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
 
@@ -111,8 +111,7 @@ const Upload: React.FC = () => {
     if (!formData.technologies.trim())
       newErrors.technologies = "Technologies are required";
 
-    if (!formData.mentorId)
-      newErrors.mentorId = "Please select a mentor";
+    if (!formData.mentorId) newErrors.mentorId = "Please select a mentor";
 
     if (formData.projectUrl.trim()) {
       try {
@@ -161,7 +160,10 @@ const Upload: React.FC = () => {
 
       if (res.status === 201) {
         setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 2000);
+        setTimeout(() => {
+          setShowSuccess(false);
+          router.replace("/student/projects"); // ⬅️ replace instead of push
+        }, 2000);
 
         // reset form
         setFormData({
@@ -191,9 +193,7 @@ const Upload: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-800">
           Upload Project or Internship
         </h1>
-        <p className="text-gray-600 mt-1">
-          Submit your work for mentor review
-        </p>
+        <p className="text-gray-600 mt-1">Submit your work for mentor review</p>
       </div>
 
       {showSuccess && (
@@ -261,9 +261,7 @@ const Upload: React.FC = () => {
               }`}
             />
             {errors.description && (
-              <p className="text-sm text-red-500 mt-1">
-                {errors.description}
-              </p>
+              <p className="text-sm text-red-500 mt-1">{errors.description}</p>
             )}
           </div>
 

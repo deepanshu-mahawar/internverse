@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { User, Mail, GraduationCap, Hash, Save } from "lucide-react";
+import { User, Mail, GraduationCap, Save } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "@/app/context/AuthContext";
 import Card from "@/app/components/Card";
@@ -16,7 +16,6 @@ const StudentProfile: React.FC = () => {
   const [formData, setFormData] = useState<any>({
     name: user?.name || "",
     email: user?.email || "",
-    studentId: user?.id || "",
     department: user?.department || "",
     year: user?.year || "",
     phone: user?.phone || "",
@@ -32,10 +31,7 @@ const StudentProfile: React.FC = () => {
     if (!user?.id) return;
 
     try {
-      await axios.put(
-        `http://127.0.0.1:5000/api/students/${user.id}`,
-        formData
-      );
+      await axios.put(`http://127.0.0.1:5000/api/students/${user.id}`, formData);
       setIsEditing(false);
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -46,7 +42,6 @@ const StudentProfile: React.FC = () => {
     setFormData({
       name: user?.name || "",
       email: user?.email || "",
-      studentId: user?.id || "",
       department: user?.department || "",
       year: user?.year || "",
       phone: user?.phone || "",
@@ -79,8 +74,9 @@ const StudentProfile: React.FC = () => {
                 value={formData.name}
                 onChange={handleChange}
                 disabled={!isEditing}
-                icon={User}
+                icon={<User />}
               />
+
               <Input
                 label="Email"
                 type="email"
@@ -88,25 +84,20 @@ const StudentProfile: React.FC = () => {
                 value={formData.email}
                 onChange={handleChange}
                 disabled={!isEditing}
-                icon={Mail}
+                icon={<Mail />}
               />
-              <Input
-                label="Student ID"
-                name="studentId"
-                value={formData.studentId}
-                onChange={handleChange}
-                disabled={!isEditing}
-                icon={Hash}
-                readOnly
-              />
+
+              {/* Student ID removed */}
+
               <Input
                 label="Department"
                 name="department"
                 value={formData.department}
                 onChange={handleChange}
                 disabled={!isEditing}
-                icon={GraduationCap}
+                icon={<GraduationCap />}
               />
+
               <Input
                 label="Year"
                 name="year"
@@ -114,6 +105,7 @@ const StudentProfile: React.FC = () => {
                 onChange={handleChange}
                 disabled={!isEditing}
               />
+
               <Input
                 label="Phone Number"
                 name="phone"

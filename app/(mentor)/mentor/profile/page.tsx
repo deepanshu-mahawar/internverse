@@ -99,7 +99,7 @@ const MentorProfile: React.FC = () => {
                 value={formData.name}
                 onChange={handleChange}
                 disabled={!isEditing}
-                icon={User}
+                icon={<User />}
               />
               <Input
                 label="Email"
@@ -108,7 +108,7 @@ const MentorProfile: React.FC = () => {
                 value={formData.email}
                 onChange={handleChange}
                 disabled={!isEditing}
-                icon={Mail}
+                icon={<Mail />}
               />
               <Input
                 label="Department"
@@ -116,7 +116,7 @@ const MentorProfile: React.FC = () => {
                 value={formData.department}
                 onChange={handleChange}
                 disabled={!isEditing}
-                icon={GraduationCap}
+                icon={<GraduationCap />}
               />
               <Input
                 label="Specialization"
@@ -131,7 +131,7 @@ const MentorProfile: React.FC = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 disabled={!isEditing}
-                icon={Hash}
+                icon={<Hash />}
               />
               <Input
                 label="Expertise"

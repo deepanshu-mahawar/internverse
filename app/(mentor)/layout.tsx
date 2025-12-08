@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
-import { redirect } from "next/navigation";
-import Loader from "../components/Loader";
-import { useAuth } from "../context/AuthContext";
+// import { redirect } from "next/navigation";
+// import Loader from "../components/Loader";
+// import { useAuth } from "../context/AuthContext";
 
 interface MentorLayoutProps {
   children: ReactNode;
