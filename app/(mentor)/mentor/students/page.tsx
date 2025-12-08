@@ -9,27 +9,6 @@ import Card from "@/app/components/Card";
 import Button from "@/app/components/Button";
 import Modal from "@/app/components/Modal";
 
-// interface Student {
-//   id: string;
-//   name: string;
-//   email: string;
-//   department: string;
-//   year: string;
-// }
-
-// interface Project {
-//   id: string;
-//   title: string;
-//   description: string;
-//   status: "approved" | "needs_improvement" | "Submitted" | string;
-//   project_type: string;
-//   student_id: string;
-//   upload_date?: string;
-// }
-
-// interface Mentor {
-//   id: string;
-// }
 
 const MentorStudents: React.FC = () => {
   const { user } = useAuth() as { user: any | null };
@@ -100,9 +79,6 @@ const MentorStudents: React.FC = () => {
 
     fetchData();
   }, [user?._id]);
-
-  console.log("student", students);
-  console.log("project", projects);
 
   const myStudents = students;
   const myProjects = projects;
@@ -180,7 +156,7 @@ const MentorStudents: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {myStudents.map((student) => {
-            const studentProjects = getStudentProjects(student.id);
+            const studentProjects = getStudentProjects(student._id);
             const approvedCount = studentProjects.filter(
               (p) => p.status === "approved"
             ).length;
@@ -289,15 +265,15 @@ const MentorStudents: React.FC = () => {
               <h4 className="font-semibold text-gray-800 mb-3">
                 Projects & Internships
               </h4>
-              {getStudentProjects(selectedStudent.id).length === 0 ? (
+              {getStudentProjects(selectedStudent._id).length === 0 ? (
                 <p className="text-gray-500 text-center py-4">
                   No projects yet
                 </p>
               ) : (
                 <div className="space-y-3">
-                  {getStudentProjects(selectedStudent.id).map((project) => (
+                  {getStudentProjects(selectedStudent._id).map((project) => (
                     <div
-                      key={project.id}
+                      key={project._id}
                       className="border border-gray-200 rounded-lg p-4"
                     >
                       <div className="flex items-start justify-between mb-2">

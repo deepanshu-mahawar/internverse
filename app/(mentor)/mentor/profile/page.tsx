@@ -32,7 +32,6 @@ const MentorProfile: React.FC = () => {
         const res = await axios.get<any>(
           `http://127.0.0.1:5000/api/mentors/${user._id}`
         );
-        console.log("Fetched mentor details:", res.data.mentor);
         setFormData({
           name: res.data.mentor.name,
           email: res.data.mentor.email,

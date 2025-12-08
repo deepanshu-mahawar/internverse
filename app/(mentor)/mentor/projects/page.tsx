@@ -102,7 +102,6 @@ const MentorProjects: React.FC = () => {
   const handleSubmitReview = async (e: FormEvent) => {
     e.preventDefault();
     if (!selectedProject || !user?._id) return;
-    console.log("Submitting review:", selectedProject);
     try {
       await axios.post(
         `http://127.0.0.1:5000/api/projects/${selectedProject._id}/feedbacks`,
