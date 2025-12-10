@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, ChangeEvent, FormEvent } from "react";
 
 import { Save, Shield, Bell, Database } from "lucide-react";

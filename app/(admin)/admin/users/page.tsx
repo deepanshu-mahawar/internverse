@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 
 import { Plus, Edit, Trash2, Eye } from "lucide-react";
@@ -7,35 +9,34 @@ import Button from "@/app/components/Button";
 import Card from "@/app/components/Card";
 import Modal from "@/app/components/Modal";
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: "student" | "mentor" | "admin";
-  department?: string;
-  year?: string;
-  phone?: string;
-  specialization?: string;
-  experience?: string;
-  company?: string;
-}
+// interface User {
+//   id: number;
+//   name: string;
+//   email: string;
+//   role: "student" | "mentor" | "admin";
+//   department?: string;
+//   year?: string;
+//   phone?: string;
+//   specialization?: string;
+//   experience?: string;
+//   company?: string;
+// }
 
-interface FormData {
-  name: string;
-  email: string;
-  role: "student" | "mentor" | "admin";
-  department?: string;
-  password?: string;
-  year?: string;
-  phone?: string;
-  specialization?: string;
-  experience?: string;
-  company?: string;
-}
+// interface FormData {
+//   name: string;
+//   email: string;
+//   role: "student" | "mentor" | "admin";
+//   department?: string;
+//   password?: string;
+//   year?: string;
+//   phone?: string;
+//   specialization?: string;
+//   experience?: string;
+//   company?: string;
+// }
 
 const AdminUsers: React.FC = () => {
   const { user } = useAuth();
-  const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
@@ -55,117 +56,143 @@ const AdminUsers: React.FC = () => {
     experience: "",
     company: "",
   });
+
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [students, setStudents] = useState<any[]>([]);
+  const [mentors, setMentors] = useState<any[]>([]);
+  const [admins, setAdmins] = useState<any[]>([]);
+
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchData = async () => {
+      if (!user?.id) return;
+
       try {
-        const res = await axios.get<User[]>(
-          "http://127.0.0.1:5000/api/admin/users"
-        );
-        setUsers(res.data);
+        const [studentResponse, mentorResponse, adminResponse] =
+          await Promise.all([
+            axios.get(`http://127.0.0.1:5000/api/admins/students`),
+            axios.get(`http://127.0.0.1:5000/api/admins/mentors`),
+            axios.get(`http://127.0.0.1:5000/api/admins/${user.id}`),
+          ]);
+
+        const studentsData = studentResponse.data.students || [];
+        const mentorsData = mentorResponse.data.mentors || [];
+        const adminObj = adminResponse.data.admin || null;
+
+        const adminsData = adminObj ? [adminObj] : [];
+
+        setStudents(studentsData);
+        setMentors(mentorsData);
+        setAdmins(adminsData);
+
+        setAllUsers([...studentsData, ...mentorsData, ...adminsData]);
       } catch (err) {
-        console.error("Error fetching users:", err);
-        setError("Failed to load users. Please try again later.");
+        console.error("Error fetching data:", err);
+        setError("Failed to load data. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
-    fetchUsers();
-  }, []);
+
+    fetchData();
+  }, [user?.id]);
 
   const filteredUsers =
-    filterRole === "all" ? users : users.filter((u) => u.role === filterRole);
+    filterRole === "all"
+      ? allUsers
+      : allUsers.filter((u) => u.role === filterRole);
 
-  const handleEdit = (user: User) => {
-    setSelectedUser(user);
-    setFormData({
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      department: user.department || "",
-      password: "",
-      year: user.year || "",
-      phone: user.phone || "",
-      specialization: user.specialization || "",
-      experience: user.experience || "",
-      company: user.company || "",
-    });
-    setIsEditModalOpen(true);
-  };
+  // const handleEdit = (user: any) => {
+  //   setSelectedUser(user);
+  //   setFormData({
+  //     name: user.name,
+  //     email: user.email,
+  //     role: user.role,
+  //     department: user.department || "",
+  //     password: "",
+  //     year: user.year || "",
+  //     phone: user.phone || "",
+  //     specialization: user.specialization || "",
+  //     experience: user.experience || "",
+  //     company: user.company || "",
+  //   });
+  //   setIsEditModalOpen(true);
+  // };
 
-  const handleView = (user: User) => {
-    setSelectedUser(user);
-    setIsViewModalOpen(true);
-  };
+  // const handleView = (user: any) => {
+  //   setSelectedUser(user);
+  //   setIsViewModalOpen(true);
+  // };
 
-  const handleSubmitEdit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!selectedUser) return;
-    setLoading(true);
-    try {
-      const { password, ...updateData } = formData;
-      const payload = password ? { ...updateData, password } : updateData;
-      const res = await axios.put<{ user: User }>(
-        `http://127.0.0.1:5000/api/admin/users/${selectedUser.id}`,
-        payload
-      );
-      setUsers(
-        users.map((u) => (u.id === selectedUser.id ? res.data.user : u))
-      );
-      setIsEditModalOpen(false);
-      setSelectedUser(null);
-    } catch (err) {
-      console.error("Error updating user:", err);
-      setError("Failed to update user. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleSubmitEdit = async (e: FormEvent) => {
+  //   e.preventDefault();
+  //   if (!selectedUser) return;
+  //   setLoading(true);
+  //   try {
+  //     const { password, ...updateData } = formData;
+  //     const payload = password ? { ...updateData, password } : updateData;
+  //     const res = await axios.put<{ user: User }>(
+  //       `http://127.0.0.1:5000/api/admin/users/${selectedUser.id}`,
+  //       payload
+  //     );
+  //     setUsers(
+  //       users.map((u) => (u.id === selectedUser.id ? res.data.user : u))
+  //     );
+  //     setIsEditModalOpen(false);
+  //     setSelectedUser(null);
+  //   } catch (err) {
+  //     console.error("Error updating user:", err);
+  //     setError("Failed to update user. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  const handleSubmitAdd = async (e: FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const res = await axios.post<{ user: User }>(
-        "http://127.0.0.1:5000/api/admin/users",
-        formData
-      );
-      setUsers([...users, res.data.user]);
-      setIsAddModalOpen(false);
-      setFormData({
-        name: "",
-        email: "",
-        role: "student",
-        department: "",
-        password: "",
-        year: "",
-        phone: "",
-        specialization: "",
-        experience: "",
-        company: "",
-      });
-    } catch (err) {
-      console.error("Error adding user:", err);
-      setError("Failed to add user. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleSubmitAdd = async (e: FormEvent) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   try {
+  //     const res = await axios.post<{ user: User }>(
+  //       "http://127.0.0.1:5000/api/admin/users",
+  //       formData
+  //     );
+  //     setUsers([...users, res.data.user]);
+  //     setIsAddModalOpen(false);
+  //     setFormData({
+  //       name: "",
+  //       email: "",
+  //       role: "student",
+  //       department: "",
+  //       password: "",
+  //       year: "",
+  //       phone: "",
+  //       specialization: "",
+  //       experience: "",
+  //       company: "",
+  //     });
+  //   } catch (err) {
+  //     console.error("Error adding user:", err);
+  //     setError("Failed to add user. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  const handleDelete = async (userId: number) => {
-    setLoading(true);
-    try {
-      await axios.delete(`http://127.0.0.1:5000/api/admin/users/${userId}`);
-      setUsers(users.filter((u) => u.id !== userId));
-    } catch (err) {
-      console.error("Error deleting user:", err);
-      setError("Failed to delete user. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleDelete = async (userId: number) => {
+  //   setLoading(true);
+  //   try {
+  //     await axios.delete(`http://127.0.0.1:5000/api/admin/users/${userId}`);
+  //     setUsers(users.filter((u) => u.id !== userId));
+  //   } catch (err) {
+  //     console.error("Error deleting user:", err);
+  //     setError("Failed to delete user. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   if (loading) return <div className="text-center py-8">Loading...</div>;
   if (error)
@@ -175,7 +202,6 @@ const AdminUsers: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">Manage Users</h1>
@@ -193,14 +219,16 @@ const AdminUsers: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
           <div className="text-center">
-            <p className="text-2xl font-bold text-indigo-600">{users.length}</p>
+            <p className="text-2xl font-bold text-indigo-600">
+              {allUsers.length}
+            </p>
             <p className="text-sm text-gray-600 mt-1">Total Users</p>
           </div>
         </Card>
         <Card>
           <div className="text-center">
             <p className="text-2xl font-bold text-blue-600">
-              {users.filter((u) => u.role === "student").length}
+              {allUsers.filter((u) => u.role === "student").length}
             </p>
             <p className="text-sm text-gray-600 mt-1">Students</p>
           </div>
@@ -208,7 +236,7 @@ const AdminUsers: React.FC = () => {
         <Card>
           <div className="text-center">
             <p className="text-2xl font-bold text-green-600">
-              {users.filter((u) => u.role === "mentor").length}
+              {allUsers.filter((u) => u.role === "mentor").length}
             </p>
             <p className="text-sm text-gray-600 mt-1">Mentors</p>
           </div>
@@ -216,7 +244,7 @@ const AdminUsers: React.FC = () => {
         <Card>
           <div className="text-center">
             <p className="text-2xl font-bold text-red-600">
-              {users.filter((u) => u.role === "admin").length}
+              {allUsers.filter((u) => u.role === "admin").length}
             </p>
             <p className="text-sm text-gray-600 mt-1">Admins</p>
           </div>
@@ -233,8 +261,8 @@ const AdminUsers: React.FC = () => {
           >
             {role.charAt(0).toUpperCase() + role.slice(1)} (
             {role === "all"
-              ? users.length
-              : users.filter((u) => u.role === role).length}
+              ? allUsers.length
+              : allUsers.filter((u) => u.role === role).length}
             )
           </Button>
         ))}
@@ -266,7 +294,7 @@ const AdminUsers: React.FC = () => {
             <tbody>
               {filteredUsers.map((user) => (
                 <tr
-                  key={user.id}
+                  key={user._id}
                   className="border-b border-gray-100 hover:bg-gray-50"
                 >
                   <td className="py-3 px-4">

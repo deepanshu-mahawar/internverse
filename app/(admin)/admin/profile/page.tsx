@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 
 import { User, Mail, Save } from "lucide-react";

@@ -1,46 +1,159 @@
-import { useState, ChangeEvent } from "react";
+"use client";
+
+import { useState, ChangeEvent, useEffect } from "react";
 
 import { Eye, Filter } from "lucide-react";
 import projectsData from "@/app/data/projects.json";
 import Card from "@/app/components/Card";
 import Modal from "@/app/components/Modal";
+import axios from "axios";
 
-interface Project {
-  id: number | string;
-  title: string;
-  studentName: string;
-  mentorName: string;
-  type: "project" | "internship";
-  status: "approved" | "under_review" | "needs_improvement" | "pending";
-  description: string;
-  company?: string;
-  startDate: string;
-  endDate: string;
-  submittedDate?: string;
-  technologies: string[];
-  feedback?: string;
-  feedbackDate?: string;
-}
+// interface Project {
+//   id: number | string;
+//   title: string;
+//   studentName: string;
+//   mentorName: string;
+//   type: "project" | "internship";
+//   status: "approved" | "under_review" | "needs_improvement" | "pending";
+//   description: string;
+//   company?: string;
+//   startDate: string;
+//   endDate: string;
+//   submittedDate?: string;
+//   technologies: string[];
+//   feedback?: string;
+//   feedbackDate?: string;
+// }
 
 const AdminProjects: React.FC = () => {
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  // const [projects, setProjects] = useState<any[]>([]);
+  // const [loading, setLoading] = useState<boolean>(true);
+  // const [error, setError] = useState<string | null>(null);
+  // // const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  // const [filterType, setFilterType] = useState<string>("all");
+  // const [filterStatus, setFilterStatus] = useState<string>("all");
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const projectResponse = await axios.get<any[]>(
+  //         `http://127.0.0.1:5000/api/admins/projects`
+  //       );
+
+  //       const projResponse = projectResponse.data.projects || [];
+
+  //       setProjects(projResponse);
+  //     } catch (err) {
+  //       console.error("Error fetching data:", err);
+  //       setError("Failed to load data. Please try again later.");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchData();
+  // }, []);
+
+  // console.log("projects", projects);
+
+  // let filteredProjects: [] = projects as any[];
+
+  // if (filterType !== "all") {
+  //   filteredProjects = filteredProjects.filter((p) => p.type === filterType);
+  // }
+
+  // if (filterStatus !== "all") {
+  //   filteredProjects = filteredProjects.filter(
+  //     (p) => p.status === filterStatus
+  //   );
+  // }
+
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [selectedProject, setSelectedProject] = useState<any | null>(null);
 
-  let filteredProjects: Project[] = projectsData as Project[];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const projectResponse = await axios.get(
+          "http://127.0.0.1:5000/api/admins/projects"
+        );
+
+        const projResponse = projectResponse.data?.projects || [];
+
+        const projectsWithMentors = await Promise.all(
+          projResponse.map(async (project: any) => {
+            try {
+              const mentorRes = await axios.get(
+                `http://127.0.0.1:5000/api/mentors/${project.mentor_id}`
+              );
+
+              return {
+                ...project,
+                mentorName: mentorRes.data?.mentor?.name || "Unknown",
+              };
+            } catch {
+              return {
+                ...project,
+                mentorName: "Unknown",
+              };
+            }
+          })
+        );
+
+        const projectsWithStudents = await Promise.all(
+          projectsWithMentors.map(async (project: any) => {
+            try {
+              const mentorRes = await axios.get(
+                `http://127.0.0.1:5000/api/students/${project.student_id}`
+              );
+
+              return {
+                ...project,
+                studentName: mentorRes.data?.data?.name || "Unknown",
+              };
+            } catch {
+              return {
+                ...project,
+                studentName: "Unknown",
+              };
+            }
+          })
+        );
+        setProjects(projectsWithStudents);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError("Failed to load data. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  console.log("projects", projects);
+
+  // Corrected filtered projects
+  let filteredProjects = [...projects];
+  console.log("filtered", filteredProjects);
 
   if (filterType !== "all") {
-    filteredProjects = filteredProjects.filter((p) => p.type === filterType);
+    filteredProjects = filteredProjects.filter(
+      (p) => p?.project_type === filterType
+    );
   }
 
   if (filterStatus !== "all") {
     filteredProjects = filteredProjects.filter(
-      (p) => p.status === filterStatus
+      (p) => p?.status === filterStatus
     );
   }
 
-  const getStatusBadge = (status: Project["status"]) => {
-    const badges: Record<Project["status"], string> = {
+  const getStatusBadge = (status: any["status"]) => {
+    const badges: Record<any["status"], string> = {
       approved: "bg-green-100 text-green-700",
       under_review: "bg-yellow-100 text-yellow-700",
       needs_improvement: "bg-red-100 text-red-700",
@@ -49,10 +162,10 @@ const AdminProjects: React.FC = () => {
     return badges[status] || badges.pending;
   };
 
-  const getStatusText = (status: Project["status"]) => {
+  const getStatusText = (status: any["status"]) => {
     return status
       .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word: any) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
   };
 
@@ -77,7 +190,7 @@ const AdminProjects: React.FC = () => {
         <Card>
           <div className="text-center">
             <p className="text-2xl font-bold text-indigo-600">
-              {projectsData.length}
+              {projects.length}
             </p>
             <p className="text-sm text-gray-600 mt-1">Total Projects</p>
           </div>
@@ -85,7 +198,7 @@ const AdminProjects: React.FC = () => {
         <Card>
           <div className="text-center">
             <p className="text-2xl font-bold text-green-600">
-              {projectsData.filter((p) => p.status === "approved").length}
+              {projects.filter((p) => p.status === "approved").length}
             </p>
             <p className="text-sm text-gray-600 mt-1">Approved</p>
           </div>
@@ -93,7 +206,7 @@ const AdminProjects: React.FC = () => {
         <Card>
           <div className="text-center">
             <p className="text-2xl font-bold text-yellow-600">
-              {projectsData.filter((p) => p.status === "under_review").length}
+              {projects.filter((p) => p.status === "Submitted").length}
             </p>
             <p className="text-sm text-gray-600 mt-1">Under Review</p>
           </div>
@@ -101,10 +214,7 @@ const AdminProjects: React.FC = () => {
         <Card>
           <div className="text-center">
             <p className="text-2xl font-bold text-red-600">
-              {
-                projectsData.filter((p) => p.status === "needs_improvement")
-                  .length
-              }
+              {projects.filter((p) => p.status === "needs_improvement").length}
             </p>
             <p className="text-sm text-gray-600 mt-1">Needs Work</p>
           </div>
@@ -164,7 +274,7 @@ const AdminProjects: React.FC = () => {
             <tbody>
               {filteredProjects.map((project) => (
                 <tr
-                  key={project.id}
+                  key={project._id}
                   className="border-b border-gray-100 hover:bg-gray-50"
                 >
                   <td className="py-3 px-4 text-sm text-gray-800">
@@ -178,7 +288,7 @@ const AdminProjects: React.FC = () => {
                   </td>
                   <td className="py-3 px-4">
                     <span className="px-2 py-1 bg-indigo-50 text-indigo-600 rounded text-xs font-medium capitalize">
-                      {project.type}
+                      {project.project_type}
                     </span>
                   </td>
                   <td className="py-3 px-4">
@@ -233,7 +343,7 @@ const AdminProjects: React.FC = () => {
                   {getStatusText(selectedProject.status)}
                 </span>
                 <span className="px-2 py-1 bg-indigo-50 text-indigo-600 rounded text-xs font-medium capitalize">
-                  {selectedProject.type}
+                  {selectedProject.project_type}
                 </span>
               </div>
             </div>
@@ -265,13 +375,13 @@ const AdminProjects: React.FC = () => {
               <div>
                 <h4 className="font-semibold text-gray-700 mb-1">Start Date</h4>
                 <p className="text-gray-600">
-                  {new Date(selectedProject.startDate).toLocaleDateString()}
+                  {new Date(selectedProject.start_date).toLocaleDateString()}
                 </p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-700 mb-1">End Date</h4>
                 <p className="text-gray-600">
-                  {new Date(selectedProject.endDate).toLocaleDateString()}
+                  {new Date(selectedProject.end_date).toLocaleDateString()}
                 </p>
               </div>
             </div>

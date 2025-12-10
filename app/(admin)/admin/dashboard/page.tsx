@@ -110,7 +110,7 @@ const AdminDashboard: React.FC = () => {
 
   // console.log("students", students);
   // console.log("mentors", mentors);
-  console.log("projects", projects);
+  // console.log("projects", projects);
 
   if (loading) return <div className="text-center py-8">Loading...</div>;
   if (error)
