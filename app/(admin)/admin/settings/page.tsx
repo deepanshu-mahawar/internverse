@@ -94,7 +94,7 @@ const AdminSettings: React.FC = () => {
             name="siteName"
             value={systemSettings.siteName}
             onChange={handleSystemChange}
-            icon={Shield}
+            icon={<Shield/>}
           />
           <Input
             label="Support Email"

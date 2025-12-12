@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 
@@ -15,6 +15,7 @@ interface FormData {
 
 const AdminProfile: React.FC = () => {
   const { user, updateProfile } = useAuth();
+  console.log("Admin Profile User:", user);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [formData, setFormData] = useState<FormData>({
     name: user?.name || "",
@@ -42,7 +43,7 @@ const AdminProfile: React.FC = () => {
     if (!user) return;
     setLoading(true);
     try {
-      const result = await updateProfile(user.id, "admin", formData);
+      const result = await updateProfile(user?.id || "", "admin", formData);
       if (result.success) {
         setIsEditing(false);
       } else {
@@ -70,10 +71,10 @@ const AdminProfile: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="text-center">
           <div className="w-32 h-32 rounded-full mx-auto mb-4 bg-indigo-100 flex items-center justify-center text-indigo-600 text-4xl font-medium">
-            {user.name.charAt(0)}
+            {user?.name.charAt(0)}
           </div>
-          <h3 className="text-xl font-semibold text-gray-800">{user.name}</h3>
-          <p className="text-gray-600 capitalize">{user.role}</p>
+          <h3 className="text-xl font-semibold text-gray-800">{user?.name}</h3>
+          <p className="text-gray-600 capitalize">{user?.role}</p>
           <div className="mt-4">
             <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
               Super Admin
@@ -90,7 +91,7 @@ const AdminProfile: React.FC = () => {
                 value={formData.name}
                 onChange={handleChange}
                 disabled={!isEditing}
-                icon={User}
+                icon={<User />}
               />
               <Input
                 label="Email"
@@ -99,7 +100,7 @@ const AdminProfile: React.FC = () => {
                 value={formData.email}
                 onChange={handleChange}
                 disabled={!isEditing}
-                icon={Mail}
+                icon={<Mail />}
               />
               <div className="flex space-x-3 pt-4">
                 {isEditing ? (
@@ -114,8 +115,8 @@ const AdminProfile: React.FC = () => {
                       onClick={() => {
                         setIsEditing(false);
                         setFormData({
-                          name: user.name,
-                          email: user.email,
+                          name: user?.name || "",
+                          email: user?.email || "",
                         });
                       }}
                     >

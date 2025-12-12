@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import axios, { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
 
 type Role = "student" | "mentor" | "admin";
 
@@ -63,6 +64,7 @@ interface ProviderProps {
 }
 
 export const AuthProvider = ({ children }: ProviderProps) => {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -191,7 +193,9 @@ export const AuthProvider = ({ children }: ProviderProps) => {
   };
 
   const logout = () => {
-    setUser(null);
+    // setUser(null);
+    localStorage.removeItem("token");
+    router.refresh();
   };
 
   const updateProfile = async (
